@@ -1,0 +1,63 @@
+{
+  "app": {
+    "title": "Laundry",
+    "subtitle": "Residence washer and dryer bookings"
+  },
+  "setup": {
+    "notConfigured": "The app is not connected to the database yet: the .env.local file with the Supabase URL and key is missing. Copy .env.example to .env.local and fill in the values."
+  },
+  "machines": {
+    "washer_int_1": "Washer 1 (indoor)",
+    "washer_int_2": "Washer 2 (indoor)",
+    "washer_ext_1": "Washer (outdoor)",
+    "dryer_int_1": "Dryer (indoor)",
+    "dryer_ext_1": "Dryer (outdoor)"
+  },
+  "slots": {
+    "range": "{{start}}–{{end}}",
+    "free": "Free",
+    "over": "Ended",
+    "yours": "Your booking",
+    "bookedBy": "{{name}} · Apt. {{apartment}}",
+    "note": "Note: {{note}}"
+  },
+  "booking": {
+    "title": "Book {{machine}}",
+    "slot": "{{day}}, {{start}}–{{end}}",
+    "name": "Full name",
+    "namePlaceholder": "E.g. Mario Rossi",
+    "apartment": "Apartment",
+    "apartmentPlaceholder": "E.g. 12B",
+    "note": "Note (optional)",
+    "noteHint": "E.g. I might finish a little after 23:00",
+    "consent": "I confirm the data I entered is correct and I consent to its use for managing bookings, as described in the privacy policy (text in preparation).",
+    "confirm": "Book",
+    "sending": "Booking…",
+    "close": "Cancel"
+  },
+  "myBookings": {
+    "title": "My bookings",
+    "empty": "No active bookings made from this device.",
+    "deviceHint": "You can only cancel a booking from the device you booked it on.",
+    "cancel": "Cancel",
+    "cancelConfirm": "Do you really want to cancel this booking?",
+    "cancelFailed": "Cancellation failed: the booking may have already been removed."
+  },
+  "errors": {
+    "slot_taken": "This slot has just been booked by someone else.",
+    "consent_required": "You must accept the data policy to book.",
+    "machine_not_available": "This machine is currently unavailable.",
+    "slot_not_aligned": "Invalid time.",
+    "slot_out_of_hours": "Time outside the bookable hours (08:00–23:00).",
+    "slot_in_past": "This time has already passed.",
+    "slot_too_far_ahead": "Bookings can be made at most 2 weeks in advance.",
+    "generic": "Something went wrong. Please try again.",
+    "loadFailed": "Could not load bookings. Check your connection."
+  },
+  "common": {
+    "loading": "Loading…",
+    "retry": "Retry",
+    "today": "Today",
+    "language": "Language"
+  }
+}

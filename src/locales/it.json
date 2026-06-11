@@ -1,0 +1,63 @@
+{
+  "app": {
+    "title": "Lavatrici",
+    "subtitle": "Prenotazioni lavatrici e asciugatrici della residenza"
+  },
+  "setup": {
+    "notConfigured": "L'app non è ancora collegata al database: manca il file .env.local con l'indirizzo e la chiave di Supabase. Copia .env.example in .env.local e inserisci i valori."
+  },
+  "machines": {
+    "washer_int_1": "Lavatrice 1 (interna)",
+    "washer_int_2": "Lavatrice 2 (interna)",
+    "washer_ext_1": "Lavatrice (esterna)",
+    "dryer_int_1": "Asciugatrice (interna)",
+    "dryer_ext_1": "Asciugatrice (esterna)"
+  },
+  "slots": {
+    "range": "{{start}}–{{end}}",
+    "free": "Libero",
+    "over": "Concluso",
+    "yours": "Tua prenotazione",
+    "bookedBy": "{{name}} · App. {{apartment}}",
+    "note": "Nota: {{note}}"
+  },
+  "booking": {
+    "title": "Prenota {{machine}}",
+    "slot": "{{day}}, ore {{start}}–{{end}}",
+    "name": "Nome e cognome",
+    "namePlaceholder": "Es. Mario Rossi",
+    "apartment": "Appartamento",
+    "apartmentPlaceholder": "Es. 12B",
+    "note": "Nota (facoltativa)",
+    "noteHint": "Es. potrei finire poco dopo le 23:00",
+    "consent": "Confermo che i dati inseriti sono corretti e acconsento al loro utilizzo per la gestione delle prenotazioni, secondo l'informativa privacy (testo in preparazione).",
+    "confirm": "Prenota",
+    "sending": "Prenotazione in corso…",
+    "close": "Annulla"
+  },
+  "myBookings": {
+    "title": "Le mie prenotazioni",
+    "empty": "Nessuna prenotazione attiva fatta da questo dispositivo.",
+    "deviceHint": "Puoi annullare una prenotazione solo dal dispositivo da cui l'hai fatta.",
+    "cancel": "Annulla",
+    "cancelConfirm": "Vuoi davvero annullare questa prenotazione?",
+    "cancelFailed": "Annullamento non riuscito: la prenotazione potrebbe essere già stata rimossa."
+  },
+  "errors": {
+    "slot_taken": "Questo orario è appena stato prenotato da qualcun altro.",
+    "consent_required": "Devi accettare il trattamento dei dati per prenotare.",
+    "machine_not_available": "Questa macchina non è al momento disponibile.",
+    "slot_not_aligned": "Orario non valido.",
+    "slot_out_of_hours": "Orario fuori dalla fascia prenotabile (08:00–23:00).",
+    "slot_in_past": "Questo orario è già passato.",
+    "slot_too_far_ahead": "Si può prenotare al massimo con 2 settimane di anticipo.",
+    "generic": "Qualcosa è andato storto. Riprova.",
+    "loadFailed": "Impossibile caricare le prenotazioni. Controlla la connessione."
+  },
+  "common": {
+    "loading": "Caricamento…",
+    "retry": "Riprova",
+    "today": "Oggi",
+    "language": "Lingua"
+  }
+}

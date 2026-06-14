@@ -6,16 +6,34 @@ export interface Slot {
 }
 
 /** Local midnight of the given date. */
-function dayStart(day: Date): Date {
+export function dayStart(day: Date): Date {
   const d = new Date(day)
   d.setHours(0, 0, 0, 0)
   return d
 }
 
-/** The bookable days: today plus the next WINDOW_DAYS - 1. */
+/** The first selectable day (today, local). */
+export function firstSelectableDay(): Date {
+  return dayStart(new Date())
+}
+
+/** The last selectable day (today + WINDOW_DAYS). */
+export function lastSelectableDay(): Date {
+  const d = firstSelectableDay()
+  d.setDate(d.getDate() + WINDOW_DAYS)
+  return d
+}
+
+/** Whether a day falls inside the bookable window [today, today + WINDOW_DAYS]. */
+export function isDaySelectable(day: Date): boolean {
+  const d = dayStart(day).getTime()
+  return d >= firstSelectableDay().getTime() && d <= lastSelectableDay().getTime()
+}
+
+/** The bookable days: today through today + WINDOW_DAYS (inclusive). */
 export function bookableDays(): Date[] {
-  const today = dayStart(new Date())
-  return Array.from({ length: WINDOW_DAYS }, (_, i) => {
+  const today = firstSelectableDay()
+  return Array.from({ length: WINDOW_DAYS + 1 }, (_, i) => {
     const d = new Date(today)
     d.setDate(d.getDate() + i)
     return d

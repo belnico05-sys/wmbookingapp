@@ -9,5 +9,5 @@ export const LAST_SLOT_HOUR = 22
 
 export const SLOT_MINUTES = 60
 
-/** How many days ahead a slot can be booked. */
-export const WINDOW_DAYS = 14
+/** How many days ahead of today a slot can be booked (today + this many). */
+export const WINDOW_DAYS = 30

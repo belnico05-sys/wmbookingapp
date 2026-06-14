@@ -46,11 +46,11 @@ export function MyBookings({ machines, reloadKey, onChanged }: Props) {
 
   return (
     <section className="mt-8">
-      <h2 className="text-base font-bold text-brand-900 dark:text-brand-100">
+      <h2 className="text-base font-bold text-brand-900 dark:text-slate-100">
         {t('myBookings.title')}
       </h2>
       {list.length === 0 ? (
-        <p className="mt-2 text-sm text-brand-400 dark:text-brand-300">
+        <p className="mt-2 text-sm text-brand-400 dark:text-slate-400">
           {t('myBookings.empty')}
         </p>
       ) : (
@@ -62,14 +62,14 @@ export function MyBookings({ machines, reloadKey, onChanged }: Props) {
             return (
               <li
                 key={b.id}
-                className="flex items-center justify-between gap-3 rounded-2xl bg-white p-3.5 text-sm ring-1 ring-brand-100 dark:bg-brand-900/30 dark:ring-brand-800"
+                className="flex items-center justify-between gap-3 rounded-2xl bg-white p-3.5 text-sm ring-1 ring-brand-100 dark:bg-white/[0.06] dark:ring-white/10"
               >
-                <span className="text-brand-900 dark:text-brand-100">
+                <span className="text-brand-900 dark:text-slate-100">
                   <span className="font-semibold">
                     {machine ? t(`machines.${machine.code}`) : `#${b.machineId}`}
                   </span>
                   <br />
-                  <span className="text-brand-600 dark:text-brand-300">
+                  <span className="text-brand-600 dark:text-slate-300">
                     {formatDayLong(start, i18n.language)} ·{' '}
                     {formatTime(start, i18n.language)}–{formatTime(end, i18n.language)}
                   </span>
@@ -85,7 +85,7 @@ export function MyBookings({ machines, reloadKey, onChanged }: Props) {
           })}
         </ul>
       )}
-      <p className="mt-3 text-xs text-brand-400 dark:text-brand-400">
+      <p className="mt-3 text-xs text-brand-400 dark:text-slate-500">
         {t('myBookings.deviceHint')}
       </p>
     </section>

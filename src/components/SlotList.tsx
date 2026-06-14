@@ -40,12 +40,12 @@ export function SlotList({ machine, day, bookings, myBookingIds, onPick }: Props
               key={slot.start.toISOString()}
               className={`rounded-2xl p-3.5 text-sm ring-1 ${
                 mine
-                  ? 'bg-brand-50 ring-brand-300 dark:bg-brand-900/40 dark:ring-brand-700'
-                  : 'bg-white ring-brand-100 dark:bg-brand-900/20 dark:ring-brand-800'
+                  ? 'bg-brand-50 ring-brand-300 dark:bg-brand-500/15 dark:ring-brand-400/40'
+                  : 'bg-white ring-brand-100 dark:bg-white/[0.04] dark:ring-white/10'
               }`}
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="font-bold text-brand-900 dark:text-brand-100">
+                <span className="font-bold text-brand-900 dark:text-slate-100">
                   {range}
                 </span>
                 {mine ? (
@@ -53,7 +53,7 @@ export function SlotList({ machine, day, bookings, myBookingIds, onPick }: Props
                     {t('slots.yours')}
                   </span>
                 ) : (
-                  <span className="text-right text-brand-700 dark:text-brand-200">
+                  <span className="text-right text-brand-700 dark:text-slate-300">
                     {t('slots.bookedBy', {
                       name: booking.name,
                       apartment: booking.apartment,
@@ -62,7 +62,7 @@ export function SlotList({ machine, day, bookings, myBookingIds, onPick }: Props
                 )}
               </div>
               {booking.note && (
-                <p className="mt-1.5 rounded-lg bg-brand-100/60 px-2 py-1 text-xs text-brand-700 dark:bg-brand-800/40 dark:text-brand-200">
+                <p className="mt-1.5 rounded-lg bg-brand-100/60 px-2 py-1 text-xs text-brand-700 dark:bg-white/10 dark:text-slate-200">
                   {t('slots.note', { note: booking.note })}
                 </p>
               )}
@@ -77,8 +77,8 @@ export function SlotList({ machine, day, bookings, myBookingIds, onPick }: Props
               onClick={() => onPick(slot)}
               className={`flex w-full items-center justify-between rounded-2xl p-3.5 text-sm transition ${
                 over
-                  ? 'cursor-not-allowed bg-transparent text-brand-300 ring-1 ring-brand-100 dark:text-brand-700 dark:ring-brand-900'
-                  : 'bg-white text-brand-900 ring-1 ring-emerald-200 hover:bg-emerald-50 hover:ring-emerald-400 dark:bg-brand-900/20 dark:text-brand-100 dark:ring-emerald-900 dark:hover:bg-emerald-950/30'
+                  ? 'cursor-not-allowed bg-transparent text-brand-300 ring-1 ring-brand-100 dark:text-slate-600 dark:ring-white/5'
+                  : 'bg-white text-brand-900 ring-1 ring-emerald-200 hover:bg-emerald-50 hover:ring-emerald-400 dark:bg-white/[0.04] dark:text-slate-100 dark:ring-emerald-500/30 dark:hover:bg-emerald-500/10'
               }`}
             >
               <span className="font-bold">{range}</span>

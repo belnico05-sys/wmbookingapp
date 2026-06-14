@@ -33,7 +33,16 @@
     "consent": "Confermo che i dati inseriti sono corretti e acconsento al loro utilizzo per la gestione delle prenotazioni, secondo l'informativa privacy (testo in preparazione).",
     "confirm": "Prenota",
     "sending": "Prenotazione in corso…",
-    "close": "Annulla"
+    "close": "Annulla",
+    "successTitle": "Prenotazione confermata!",
+    "reminderQuestion": "Vuoi un promemoria sul telefono?",
+    "addCalendar": "Aggiungi al calendario",
+    "addGoogle": "Google Calendar",
+    "done": "Fatto"
+  },
+  "reminder": {
+    "summary": "Lavatrici: {{machine}}",
+    "description": "Turno prenotato tramite l'app Lavatrici della residenza."
   },
   "myBookings": {
     "title": "Le mie prenotazioni",
@@ -50,14 +59,21 @@
     "slot_not_aligned": "Orario non valido.",
     "slot_out_of_hours": "Orario fuori dalla fascia prenotabile (08:00–23:00).",
     "slot_in_past": "Questo orario è già passato.",
-    "slot_too_far_ahead": "Si può prenotare al massimo con 2 settimane di anticipo.",
+    "slot_too_far_ahead": "Si può prenotare al massimo con 30 giorni di anticipo.",
     "generic": "Qualcosa è andato storto. Riprova.",
     "loadFailed": "Impossibile caricare le prenotazioni. Controlla la connessione."
+  },
+  "nav": {
+    "myBookings": "Le mie prenotazioni"
   },
   "common": {
     "loading": "Caricamento…",
     "retry": "Riprova",
     "today": "Oggi",
-    "language": "Lingua"
+    "language": "Lingua",
+    "back": "Indietro",
+    "selectDate": "Scegli la data",
+    "previousMonth": "Mese precedente",
+    "nextMonth": "Mese successivo"
   }
 }

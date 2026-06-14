@@ -23,7 +23,7 @@ export function MachinePicker({ machines, selectedId, onSelect }: Props) {
             className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-medium transition disabled:opacity-40 ${
               isSelected
                 ? 'bg-brand-600 text-white shadow-md shadow-brand-600/30'
-                : 'bg-white text-brand-900 ring-1 ring-brand-100 hover:ring-brand-300 dark:bg-brand-900/40 dark:text-brand-100 dark:ring-brand-800'
+                : 'bg-white text-brand-900 ring-1 ring-brand-100 hover:ring-brand-300 dark:bg-white/[0.06] dark:text-slate-100 dark:ring-white/10'
             }`}
           >
             <span aria-hidden="true">{icon}</span>

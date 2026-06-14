@@ -7,13 +7,15 @@ export function LanguageToggle() {
   const current = i18n.language.startsWith('en') ? 'en' : 'it'
 
   return (
-    <div className="flex gap-1">
+    <div className="flex shrink-0 gap-0.5 rounded-full bg-white/15 p-0.5">
       {LANGS.map((lng) => (
         <button
           key={lng}
           onClick={() => i18n.changeLanguage(lng)}
-          className={`rounded px-2 py-1 text-xs uppercase ${
-            current === lng ? 'bg-sky-600 text-white' : 'bg-gray-100 text-gray-600'
+          className={`rounded-full px-2.5 py-1 text-xs font-semibold uppercase transition ${
+            current === lng
+              ? 'bg-white text-brand-700'
+              : 'text-white/80 hover:text-white'
           }`}
         >
           {lng}

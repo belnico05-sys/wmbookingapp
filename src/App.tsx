@@ -17,8 +17,10 @@ export default function App() {
   if (!isSupabaseConfigured) {
     return (
       <main className="mx-auto max-w-md p-6">
-        <h1 className="text-xl font-semibold">{t('app.title')}</h1>
-        <p className="mt-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
+        <h1 className="text-xl font-bold text-brand-700 dark:text-brand-200">
+          {t('app.title')}
+        </h1>
+        <p className="mt-4 rounded-2xl bg-amber-50 p-4 text-sm text-amber-900 ring-1 ring-amber-200 dark:bg-amber-950/40 dark:text-amber-200 dark:ring-amber-900">
           {t('setup.notConfigured')}
         </p>
       </main>
@@ -100,51 +102,65 @@ function BookingApp() {
   const selectedMachine = machines.find((m) => m.id === selectedMachineId) ?? null
 
   return (
-    <main className="mx-auto max-w-md p-4">
-      <header className="flex items-start justify-between">
-        <div>
-          <h1 className="text-xl font-semibold">{t('app.title')}</h1>
-          <p className="text-sm text-gray-500">{t('app.subtitle')}</p>
+    <div className="min-h-screen pb-12">
+      <header className="sticky top-0 z-20 bg-brand-700 text-white shadow-lg shadow-brand-900/20 dark:bg-brand-900">
+        <div className="mx-auto flex max-w-md items-center justify-between gap-3 px-4 py-3">
+          <div className="flex items-center gap-2.5">
+            <span
+              className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/15 text-xl"
+              aria-hidden="true"
+            >
+              🧺
+            </span>
+            <div>
+              <h1 className="text-lg font-bold leading-tight">{t('app.title')}</h1>
+              <p className="text-xs text-brand-100">{t('app.subtitle')}</p>
+            </div>
+          </div>
+          <LanguageToggle />
         </div>
-        <LanguageToggle />
       </header>
 
-      {error && (
-        <p className="mt-3 rounded-lg bg-red-50 p-2 text-sm text-red-700">{error}</p>
-      )}
-
-      <div className="mt-4">
-        <DayPicker days={days} selected={selectedDay} onSelect={setSelectedDay} />
-      </div>
-
-      <div className="mt-4">
-        <MachinePicker
-          machines={machines}
-          selectedId={selectedMachineId}
-          onSelect={setSelectedMachineId}
-        />
-      </div>
-
-      <div className="mt-4">
-        {selectedMachine && (
-          <SlotList
-            machine={selectedMachine}
-            day={selectedDay}
-            bookings={bookings}
-            myBookingIds={myBookingIds}
-            onPick={setPicked}
-          />
+      <main className="mx-auto max-w-md px-4">
+        {error && (
+          <p className="mt-4 rounded-2xl bg-accent-100 p-3 text-sm font-medium text-accent-700 dark:bg-accent-700/20 dark:text-accent-100">
+            {error}
+          </p>
         )}
-      </div>
 
-      <MyBookings
-        machines={machines}
-        reloadKey={myReloadKey}
-        onChanged={() => {
-          setMyReloadKey((k) => k + 1)
-          loadBookings()
-        }}
-      />
+        <section className="mt-5">
+          <DayPicker days={days} selected={selectedDay} onSelect={setSelectedDay} />
+        </section>
+
+        <section className="mt-5">
+          <MachinePicker
+            machines={machines}
+            selectedId={selectedMachineId}
+            onSelect={setSelectedMachineId}
+          />
+        </section>
+
+        <section className="mt-5">
+          {selectedMachine && (
+            <SlotList
+              machine={selectedMachine}
+              day={selectedDay}
+              bookings={bookings}
+              myBookingIds={myBookingIds}
+              onPick={setPicked}
+            />
+          )}
+        </section>
+
+        <MyBookings
+          machines={machines}
+          reloadKey={myReloadKey}
+          onChanged={() => {
+            setMyReloadKey((k) => k + 1)
+            loadBookings()
+          }}
+        />
+      </main>
 
       {picked && selectedMachine && (
         <BookingModal
@@ -158,6 +174,6 @@ function BookingApp() {
           }}
         />
       )}
-    </main>
+    </div>
   )
 }

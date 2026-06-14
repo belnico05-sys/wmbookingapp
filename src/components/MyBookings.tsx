@@ -45,12 +45,16 @@ export function MyBookings({ machines, reloadKey, onChanged }: Props) {
   }
 
   return (
-    <section className="mt-6">
-      <h2 className="text-base font-semibold">{t('myBookings.title')}</h2>
+    <section className="mt-8">
+      <h2 className="text-base font-bold text-brand-900 dark:text-brand-100">
+        {t('myBookings.title')}
+      </h2>
       {list.length === 0 ? (
-        <p className="mt-2 text-sm text-gray-500">{t('myBookings.empty')}</p>
+        <p className="mt-2 text-sm text-brand-400 dark:text-brand-300">
+          {t('myBookings.empty')}
+        </p>
       ) : (
-        <ul className="mt-2 flex flex-col gap-2">
+        <ul className="mt-3 flex flex-col gap-2">
           {list.map((b) => {
             const start = new Date(b.slotStart)
             const end = new Date(start.getTime() + SLOT_MINUTES * 60_000)
@@ -58,17 +62,20 @@ export function MyBookings({ machines, reloadKey, onChanged }: Props) {
             return (
               <li
                 key={b.id}
-                className="flex items-center justify-between rounded-lg border border-gray-200 p-3 text-sm"
+                className="flex items-center justify-between gap-3 rounded-2xl bg-white p-3.5 text-sm ring-1 ring-brand-100 dark:bg-brand-900/30 dark:ring-brand-800"
               >
-                <span>
-                  {machine ? t(`machines.${machine.code}`) : `#${b.machineId}`}
-                  {' · '}
-                  {formatDayLong(start, i18n.language)}
-                  {' · '}
-                  {formatTime(start, i18n.language)}–{formatTime(end, i18n.language)}
+                <span className="text-brand-900 dark:text-brand-100">
+                  <span className="font-semibold">
+                    {machine ? t(`machines.${machine.code}`) : `#${b.machineId}`}
+                  </span>
+                  <br />
+                  <span className="text-brand-600 dark:text-brand-300">
+                    {formatDayLong(start, i18n.language)} ·{' '}
+                    {formatTime(start, i18n.language)}–{formatTime(end, i18n.language)}
+                  </span>
                 </span>
                 <button
-                  className="rounded-lg border border-red-300 px-3 py-1 text-red-600"
+                  className="shrink-0 rounded-full px-3.5 py-1.5 font-semibold text-accent-600 ring-1 ring-accent-600/40 transition hover:bg-accent-600 hover:text-white dark:text-accent-100 dark:ring-accent-100/30"
                   onClick={() => cancel(b)}
                 >
                   {t('myBookings.cancel')}
@@ -78,7 +85,9 @@ export function MyBookings({ machines, reloadKey, onChanged }: Props) {
           })}
         </ul>
       )}
-      <p className="mt-2 text-xs text-gray-400">{t('myBookings.deviceHint')}</p>
+      <p className="mt-3 text-xs text-brand-400 dark:text-brand-400">
+        {t('myBookings.deviceHint')}
+      </p>
     </section>
   )
 }

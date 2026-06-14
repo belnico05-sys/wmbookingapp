@@ -1,12 +1,51 @@
 @import "tailwindcss";
 
+/* DSU Toscana brand palette (from their theme: indigo #2b3db3 + red #d60007),
+   modernised — more vivid, more rounded. Exposed as Tailwind color tokens,
+   so `bg-brand-600`, `text-accent-600`, `ring-brand-500`, etc. all work. */
+@theme {
+  --color-brand-50: #f0f1f8;
+  --color-brand-100: #e9ebf5;
+  --color-brand-200: #cfd4f6;
+  --color-brand-300: #8e98da;
+  --color-brand-400: #5566c4;
+  --color-brand-500: #3b4cbb;
+  --color-brand-600: #2b3db3;
+  --color-brand-700: #1c2875;
+  --color-brand-800: #161f5c;
+  --color-brand-900: #0d1338;
+
+  --color-accent-100: #fdc6c6;
+  --color-accent-500: #e60008;
+  --color-accent-600: #d60007;
+  --color-accent-700: #ae000f;
+
+  --radius-xl: 0.9rem;
+  --radius-2xl: 1.25rem;
+}
+
 html {
   -webkit-text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
-  background: #f9fafb;
-  color: #111827;
   font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+  background: var(--color-brand-50);
+  color: var(--color-brand-900);
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #0a0e23;
+    color: #e7e9f5;
+  }
+}
+
+/* Smooth, momentum scrolling for the horizontal day strip on phones. */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }

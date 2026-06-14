@@ -14,8 +14,8 @@ export default defineConfig({
         name: 'Lavatrici — Prenotazioni',
         short_name: 'Lavatrici',
         description: 'Prenotazione lavatrici e asciugatrici della residenza',
-        theme_color: '#0ea5e9',
-        background_color: '#ffffff',
+        theme_color: '#2b3db3',
+        background_color: '#f0f1f8',
         display: 'standalone',
         // TODO: replace with real icons during the design pass
         icons: [

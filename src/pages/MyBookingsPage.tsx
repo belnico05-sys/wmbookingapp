@@ -21,9 +21,20 @@ export function MyBookingsPage({ machines }: Props) {
             to="/"
             aria-label={t('common.back')}
             title={t('common.back')}
-            className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/15 text-xl transition hover:bg-white/25"
+            className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/15 transition hover:bg-white/25"
           >
-            <span aria-hidden="true">←</span>
+            <svg
+              viewBox="0 0 24 24"
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M15 5l-7 7 7 7" />
+            </svg>
           </Link>
         }
       />

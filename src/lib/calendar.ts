@@ -1,4 +1,4 @@
-import { dayStart, firstSelectableDay, lastSelectableDay } from './slots'
+import { firstSelectableDay, lastSelectableDay } from './slots'
 
 export interface MonthGrid {
   year: number
@@ -56,5 +56,3 @@ export function formatEuDate(d: Date): string {
   const month = String(d.getMonth() + 1).padStart(2, '0')
   return `${day}/${month}/${d.getFullYear()}`
 }
-
-export { dayStart }

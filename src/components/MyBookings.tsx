@@ -2,39 +2,19 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Machine } from '../lib/types'
 import { SLOT_MINUTES } from '../lib/config'
-import { db } from '../lib/supabase'
-import { getMyBookings, removeMyBooking, type MyBooking } from '../lib/myBookings'
+import { myUpcomingBookings, type MyBooking } from '../auth/identity'
 import { formatDayLong, formatTime } from '../lib/format'
+import { CancelBookingSheet } from './CancelBookingSheet'
 
 interface Props {
   machines: Machine[]
 }
 
-/** Bookings whose slot has not fully ended yet. */
-function futureBookings(): MyBooking[] {
-  const now = Date.now()
-  return getMyBookings()
-    .filter((b) => new Date(b.slotStart).getTime() + SLOT_MINUTES * 60_000 > now)
-    .sort((a, b) => a.slotStart.localeCompare(b.slotStart))
-}
-
+/** List of the user's upcoming bookings, each with a cancel button. */
 export function MyBookings({ machines }: Props) {
   const { t, i18n } = useTranslation()
-  const [list, setList] = useState<MyBooking[]>(futureBookings)
-
-  async function cancel(b: MyBooking) {
-    if (!window.confirm(t('myBookings.cancelConfirm'))) return
-    const { data, error } = await db().rpc('cancel_booking', {
-      p_booking_id: b.id,
-      p_cancel_token: b.cancelToken,
-    })
-    if (error || data !== true) {
-      window.alert(t('myBookings.cancelFailed'))
-      return
-    }
-    removeMyBooking(b.id)
-    setList(futureBookings())
-  }
+  const [list, setList] = useState<MyBooking[]>(myUpcomingBookings)
+  const [toCancel, setToCancel] = useState<MyBooking | null>(null)
 
   return (
     <section className="mt-8">
@@ -48,8 +28,7 @@ export function MyBookings({ machines }: Props) {
       ) : (
         <ul className="mt-3 flex flex-col gap-2">
           {list.map((b) => {
-            const start = new Date(b.slotStart)
-            const end = new Date(start.getTime() + SLOT_MINUTES * 60_000)
+            const end = new Date(b.slotStart.getTime() + SLOT_MINUTES * 60_000)
             const machine = machines.find((m) => m.id === b.machineId)
             return (
               <li
@@ -62,13 +41,13 @@ export function MyBookings({ machines }: Props) {
                   </span>
                   <br />
                   <span className="text-brand-600 dark:text-slate-300">
-                    {formatDayLong(start, i18n.language)} ·{' '}
-                    {formatTime(start, i18n.language)}–{formatTime(end, i18n.language)}
+                    {formatDayLong(b.slotStart, i18n.language)} ·{' '}
+                    {formatTime(b.slotStart, i18n.language)}–{formatTime(end, i18n.language)}
                   </span>
                 </span>
                 <button
                   className="shrink-0 rounded-full px-3.5 py-1.5 font-semibold text-accent-600 ring-1 ring-accent-600/40 transition hover:bg-accent-600 hover:text-white dark:text-accent-100 dark:ring-accent-100/30"
-                  onClick={() => cancel(b)}
+                  onClick={() => setToCancel(b)}
                 >
                   {t('myBookings.cancel')}
                 </button>
@@ -80,6 +59,15 @@ export function MyBookings({ machines }: Props) {
       <p className="mt-3 text-xs text-brand-400 dark:text-slate-500">
         {t('myBookings.deviceHint')}
       </p>
+
+      {toCancel && (
+        <CancelBookingSheet
+          booking={toCancel}
+          machine={machines.find((m) => m.id === toCancel.machineId)}
+          onClose={() => setToCancel(null)}
+          onCancelled={() => setList(myUpcomingBookings())}
+        />
+      )}
     </section>
   )
 }

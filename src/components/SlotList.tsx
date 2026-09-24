@@ -18,8 +18,8 @@ export function SlotList({ machine, day, bookings, myBookingIds, onPick }: Props
   // Index this machine's bookings by slot-start timestamp for quick lookup.
   const byStart = new Map<number, Booking>()
   for (const b of bookings) {
-    if (b.machine_id === machine.id) {
-      byStart.set(new Date(b.slot_start).getTime(), b)
+    if (b.machineId === machine.id) {
+      byStart.set(b.slotStart.getTime(), b)
     }
   }
 

@@ -49,8 +49,13 @@
     "empty": "Nessuna prenotazione attiva fatta da questo dispositivo.",
     "deviceHint": "Puoi annullare una prenotazione solo dal dispositivo da cui l'hai fatta.",
     "cancel": "Annulla",
-    "cancelConfirm": "Vuoi davvero annullare questa prenotazione?",
     "cancelFailed": "Annullamento non riuscito: la prenotazione potrebbe essere già stata rimossa."
+  },
+  "cancel": {
+    "title": "Annullare la prenotazione?",
+    "keep": "No, tienila",
+    "confirm": "Sì, annulla",
+    "sending": "Annullamento…"
   },
   "errors": {
     "slot_taken": "Questo orario è appena stato prenotato da qualcun altro.",

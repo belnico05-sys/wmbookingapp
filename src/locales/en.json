@@ -49,8 +49,13 @@
     "empty": "No active bookings made from this device.",
     "deviceHint": "You can only cancel a booking from the device you booked it on.",
     "cancel": "Cancel",
-    "cancelConfirm": "Do you really want to cancel this booking?",
     "cancelFailed": "Cancellation failed: the booking may have already been removed."
+  },
+  "cancel": {
+    "title": "Cancel this booking?",
+    "keep": "No, keep it",
+    "confirm": "Yes, cancel",
+    "sending": "Cancelling…"
   },
   "errors": {
     "slot_taken": "This slot has just been booked by someone else.",

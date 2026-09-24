@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import type { Booking, Machine } from '../lib/types'
-import { db } from '../lib/supabase'
-import { dayRange, firstSelectableDay, type Slot } from '../lib/slots'
-import { getMyBookings } from '../lib/myBookings'
+import type { Machine } from '../lib/types'
+import { firstSelectableDay, type Slot } from '../lib/slots'
+import { myBookingIds } from '../auth/identity'
+import { useDayBookings } from '../hooks/useDayBookings'
 import { BrandHeader } from '../components/BrandHeader'
 import { DatePicker } from '../components/DatePicker'
 import { MachinePicker } from '../components/MachinePicker'
@@ -16,69 +16,16 @@ interface Props {
   machines: Machine[]
 }
 
-/** IDs of the bookings made from this device. */
-function ownBookingIds(): Set<string> {
-  return new Set(getMyBookings().map((b) => b.id))
-}
-
-/** All bookings of one day; null if the request failed. */
-async function fetchDayBookings(day: Date): Promise<Booking[] | null> {
-  const { from, to } = dayRange(day)
-  const { data, error } = await db()
-    .from('bookings')
-    .select('id, machine_id, slot_start, name, apartment, note')
-    .gte('slot_start', from.toISOString())
-    .lt('slot_start', to.toISOString())
-  return error ? null : (data as Booking[])
-}
-
+/** Home page: pick a day and a machine, then book a free slot. */
 export function BookingPage({ machines }: Props) {
   const { t } = useTranslation()
 
-  const [selectedDay, setSelectedDay] = useState<Date>(firstSelectableDay())
+  const [selectedDay, setSelectedDay] = useState<Date>(firstSelectableDay)
   const [selectedMachineId, setSelectedMachineId] = useState<number | null>(
     machines[0]?.id ?? null,
   )
-  const [bookings, setBookings] = useState<Booking[]>([])
-  const [myBookingIds, setMyBookingIds] = useState(ownBookingIds)
-  const [picked, setPicked] = useState<Slot | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  // Bumped to refetch the visible day (after booking, or on a Realtime event).
-  const [reloadTick, setReloadTick] = useState(0)
-  const reload = useCallback(() => setReloadTick((n) => n + 1), [])
-
-  useEffect(() => {
-    // Ignore replies that arrive after the day changed (fast tapping).
-    let stale = false
-    fetchDayBookings(selectedDay).then((data) => {
-      if (stale) return
-      if (data === null) {
-        setError(t('errors.loadFailed'))
-        return
-      }
-      setError(null)
-      setBookings(data)
-      setMyBookingIds(ownBookingIds())
-    })
-    return () => {
-      stale = true
-    }
-  }, [selectedDay, reloadTick, t])
-
-  // Realtime: any change to bookings refreshes the visible day.
-  useEffect(() => {
-    const channel = db()
-      .channel('bookings-changes')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'bookings' },
-        reload,
-      )
-      .subscribe()
-    return () => {
-      db().removeChannel(channel)
-    }
-  }, [reload])
+  const [toBook, setToBook] = useState<Slot | null>(null)
+  const { bookings, loadFailed, reload } = useDayBookings(selectedDay)
 
   const selectedMachine = machines.find((m) => m.id === selectedMachineId) ?? null
 
@@ -101,9 +48,9 @@ export function BookingPage({ machines }: Props) {
       />
 
       <main className="mx-auto max-w-md px-4">
-        {error && (
+        {loadFailed && (
           <p className="mt-4 rounded-2xl bg-accent-100 p-3 text-sm font-medium text-accent-700 dark:bg-accent-700/20 dark:text-accent-100">
-            {error}
+            {t('errors.loadFailed')}
           </p>
         )}
 
@@ -125,18 +72,18 @@ export function BookingPage({ machines }: Props) {
               machine={selectedMachine}
               day={selectedDay}
               bookings={bookings}
-              myBookingIds={myBookingIds}
-              onPick={setPicked}
+              myBookingIds={myBookingIds()}
+              onPick={setToBook}
             />
           )}
         </section>
       </main>
 
-      {picked && selectedMachine && (
+      {toBook && selectedMachine && (
         <BookingModal
           machine={selectedMachine}
-          slot={picked}
-          onClose={() => setPicked(null)}
+          slot={toBook}
+          onClose={() => setToBook(null)}
           onBooked={reload}
         />
       )}

@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
-import type { Machine } from './lib/types'
-import { isSupabaseConfigured, db } from './lib/supabase'
+import { isSupabaseConfigured } from './api/client'
+import { useMachines } from './hooks/useMachines'
 import { BookingPage } from './pages/BookingPage'
 import { MyBookingsPage } from './pages/MyBookingsPage'
 
@@ -27,25 +26,10 @@ export default function App() {
 
 function ConfiguredApp() {
   const { t } = useTranslation()
-  const [machines, setMachines] = useState<Machine[] | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const { machines, loadFailed } = useMachines()
 
-  useEffect(() => {
-    db()
-      .from('machines')
-      .select('*')
-      .order('id')
-      .then(({ data, error }) => {
-        if (error) {
-          setError(t('errors.loadFailed'))
-          return
-        }
-        setMachines(data as Machine[])
-      })
-  }, [t])
-
-  if (error) {
-    return <p className="mx-auto max-w-md p-6 text-sm text-accent-600">{error}</p>
+  if (loadFailed) {
+    return <p className="mx-auto max-w-md p-6 text-sm text-accent-600">{t('errors.loadFailed')}</p>
   }
   if (!machines) {
     return <p className="mx-auto max-w-md p-6 text-sm text-brand-500">{t('common.loading')}</p>

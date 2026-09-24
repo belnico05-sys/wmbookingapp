@@ -18,6 +18,7 @@
     "free": "Free",
     "over": "Ended",
     "yours": "Your booking",
+    "cancelMine": "Cancel your booking",
     "bookedBy": "{{name}} · Apt. {{apartment}}",
     "note": "Note: {{note}}"
   },

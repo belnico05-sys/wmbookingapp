@@ -18,6 +18,7 @@
     "free": "Libero",
     "over": "Concluso",
     "yours": "Tua prenotazione",
+    "cancelMine": "Annulla la tua prenotazione",
     "bookedBy": "{{name}} · App. {{apartment}}",
     "note": "Nota: {{note}}"
   },

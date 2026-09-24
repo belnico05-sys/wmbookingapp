@@ -8,10 +8,14 @@ interface Props {
   day: Date
   bookings: Booking[]
   myBookingIds: Set<string>
+  /** A free slot was tapped ("+"). */
   onPick: (slot: Slot) => void
+  /** The "−" on one of the user's own bookings was tapped. */
+  onCancel: (booking: Booking) => void
 }
 
-export function SlotList({ machine, day, bookings, myBookingIds, onPick }: Props) {
+/** The day's slots for one machine: free ("+"), taken, or the user's own ("−"). */
+export function SlotList({ machine, day, bookings, myBookingIds, onPick, onCancel }: Props) {
   const { t, i18n } = useTranslation()
   const lang = i18n.language
 
@@ -49,8 +53,20 @@ export function SlotList({ machine, day, bookings, myBookingIds, onPick }: Props
                   {range}
                 </span>
                 {mine ? (
-                  <span className="rounded-full bg-brand-600 px-2.5 py-0.5 text-xs font-semibold text-white">
-                    {t('slots.yours')}
+                  <span className="flex items-center gap-1.5">
+                    <span className="rounded-full bg-brand-600 px-2.5 py-0.5 text-xs font-semibold text-white">
+                      {t('slots.yours')}
+                    </span>
+                    {!over && (
+                      <button
+                        onClick={() => onCancel(booking)}
+                        aria-label={t('slots.cancelMine')}
+                        title={t('slots.cancelMine')}
+                        className="flex h-6 w-6 items-center justify-center rounded-full bg-accent-600 text-base leading-none text-white transition hover:bg-accent-700"
+                      >
+                        −
+                      </button>
+                    )}
                   </span>
                 ) : (
                   <span className="text-right text-brand-700 dark:text-slate-300">

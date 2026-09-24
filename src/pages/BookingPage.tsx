@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import type { Machine } from '../lib/types'
+import type { Booking, Machine } from '../lib/types'
 import { firstSelectableDay, type Slot } from '../lib/slots'
 import { myBookingIds } from '../auth/identity'
 import { useDayBookings } from '../hooks/useDayBookings'
@@ -10,13 +10,14 @@ import { DatePicker } from '../components/DatePicker'
 import { MachinePicker } from '../components/MachinePicker'
 import { SlotList } from '../components/SlotList'
 import { BookingModal } from '../components/BookingModal'
+import { CancelBookingSheet } from '../components/CancelBookingSheet'
 import { LanguageToggle } from '../components/LanguageToggle'
 
 interface Props {
   machines: Machine[]
 }
 
-/** Home page: pick a day and a machine, then book a free slot. */
+/** Home page: pick a day and a machine, then book a free slot or unbook your own. */
 export function BookingPage({ machines }: Props) {
   const { t } = useTranslation()
 
@@ -25,6 +26,7 @@ export function BookingPage({ machines }: Props) {
     machines[0]?.id ?? null,
   )
   const [toBook, setToBook] = useState<Slot | null>(null)
+  const [toCancel, setToCancel] = useState<Booking | null>(null)
   const { bookings, loadFailed, reload } = useDayBookings(selectedDay)
 
   const selectedMachine = machines.find((m) => m.id === selectedMachineId) ?? null
@@ -74,10 +76,20 @@ export function BookingPage({ machines }: Props) {
               bookings={bookings}
               myBookingIds={myBookingIds()}
               onPick={setToBook}
+              onCancel={setToCancel}
             />
           )}
         </section>
       </main>
+
+      {toCancel && (
+        <CancelBookingSheet
+          booking={toCancel}
+          machine={machines.find((m) => m.id === toCancel.machineId)}
+          onClose={() => setToCancel(null)}
+          onCancelled={reload}
+        />
+      )}
 
       {toBook && selectedMachine && (
         <BookingModal

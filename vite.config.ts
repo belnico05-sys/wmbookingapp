@@ -17,7 +17,6 @@ export default defineConfig({
         theme_color: '#2b3db3',
         background_color: '#f0f1f8',
         display: 'standalone',
-        // TODO: replace with real icons during the design pass
         icons: [
           {
             src: 'icon-192.png',

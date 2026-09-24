@@ -17,7 +17,8 @@ students on their phones; the app is shared via link/QR code.
 - `npm run dev -- --host` — dev server, reachable from phones on the same Wi-Fi
 - `npm run build` / `npm run preview` — production build / local preview
 - `npx supabase ...` — database work (see `.claude/skills/db`)
-- `npm test` — once tests exist
+- `npm test` — Vitest unit tests (`src/**/*.test.ts`, timezone pinned to Europe/Rome)
+- `npm run lint` — must be clean before committing
 
 ## Domain rules
 
@@ -42,6 +43,16 @@ students on their phones; the app is shared via link/QR code.
 **No hardcoded UI strings.** Every user-facing string goes through
 `react-i18next` keys. `src/locales/it.json` is the primary locale and
 `src/locales/en.json` must be kept in sync (see `.claude/skills/i18n`).
+
+## Code structure
+
+Layers (details in `docs/ARCHITECTURE.md`): `pages → components/hooks → auth →
+api → Supabase`. Only `src/api/` talks to Supabase. Only `src/auth/identity.ts`
+knows who the user is / which bookings are theirs (it is the seam for the
+planned university login, `docs/FUTURE-AUTH.md`). `src/lib/` is pure helpers.
+Booking rules in `src/lib/config.ts` must match `create_booking` in SQL.
+Keep `README.md` and `docs/` up to date when changing structure: the code is
+meant to be handed over to other programmers.
 
 ## Conventions
 

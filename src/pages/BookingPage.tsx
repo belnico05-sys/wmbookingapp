@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import type { Booking, Machine } from '../lib/types'
+import type { Booking } from '../lib/types'
 import { firstSelectableDay, type Slot } from '../lib/slots'
 import { myBookingIds } from '../auth/identity'
 import { useDayBookings } from '../hooks/useDayBookings'
+import { useResidence } from '../residence/useResidence'
 import { BrandHeader } from '../components/BrandHeader'
 import { DatePicker } from '../components/DatePicker'
 import { MachinePicker } from '../components/MachinePicker'
@@ -13,23 +14,23 @@ import { BookingModal } from '../components/BookingModal'
 import { CancelBookingSheet } from '../components/CancelBookingSheet'
 import { LanguageToggle } from '../components/LanguageToggle'
 
-interface Props {
-  machines: Machine[]
-}
-
 /** Home page: pick a day and a machine, then book a free slot or unbook your own. */
-export function BookingPage({ machines }: Props) {
+export function BookingPage() {
   const { t } = useTranslation()
+  const { machines } = useResidence()
 
   const [selectedDay, setSelectedDay] = useState<Date>(firstSelectableDay)
-  const [selectedMachineId, setSelectedMachineId] = useState<number | null>(
-    machines[0]?.id ?? null,
-  )
+  const [selectedMachineId, setSelectedMachineId] = useState<number | null>(null)
   const [toBook, setToBook] = useState<Slot | null>(null)
   const [toCancel, setToCancel] = useState<Booking | null>(null)
   const { bookings, loadFailed, reload } = useDayBookings(selectedDay)
 
-  const selectedMachine = machines.find((m) => m.id === selectedMachineId) ?? null
+  // Until the user picks one (or if theirs was retired), show the first
+  // machine that is not under maintenance.
+  const selectedMachine =
+    machines.find((m) => m.id === selectedMachineId) ??
+    machines.find((m) => m.active) ??
+    null
 
   return (
     <div className="min-h-screen pb-12">
@@ -63,7 +64,7 @@ export function BookingPage({ machines }: Props) {
         <section className="mt-4">
           <MachinePicker
             machines={machines}
-            selectedId={selectedMachineId}
+            selectedId={selectedMachine?.id ?? null}
             onSelect={setSelectedMachineId}
           />
         </section>

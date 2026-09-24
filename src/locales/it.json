@@ -7,11 +7,19 @@
     "notConfigured": "L'app non è ancora collegata al database: manca il file .env.local con l'indirizzo e la chiave di Supabase. Copia .env.example in .env.local e inserisci i valori."
   },
   "machines": {
-    "washer_int_1": "Lavatrice 1 (interna)",
-    "washer_int_2": "Lavatrice 2 (interna)",
-    "washer_ext_1": "Lavatrice (esterna)",
-    "dryer_int_1": "Asciugatrice (interna)",
-    "dryer_ext_1": "Asciugatrice (esterna)"
+    "maintenance": "In manutenzione"
+  },
+  "machineTypes": {
+    "washer": "Lavatrice",
+    "dryer": "Asciugatrice"
+  },
+  "locations": {
+    "internal": "interna",
+    "external": "esterna"
+  },
+  "machineName": {
+    "withLabel": "{{type}} {{label}} ({{location}})",
+    "withoutLabel": "{{type}} ({{location}})"
   },
   "slots": {
     "range": "{{start}}–{{end}}",
@@ -20,7 +28,8 @@
     "yours": "Tua prenotazione",
     "cancelMine": "Annulla la tua prenotazione",
     "bookedBy": "{{name}} · App. {{apartment}}",
-    "note": "Nota: {{note}}"
+    "note": "Nota: {{note}}",
+    "maintenanceNotice": "Questa macchina è in manutenzione: per ora non si può prenotare."
   },
   "booking": {
     "title": "Prenota {{machine}}",
@@ -28,9 +37,9 @@
     "name": "Nome e cognome",
     "namePlaceholder": "Es. Mario Rossi",
     "apartment": "Appartamento",
-    "apartmentPlaceholder": "Es. 12B",
+    "apartmentPlaceholder": "Scegli…",
     "note": "Nota (facoltativa)",
-    "noteHint": "Es. potrei finire poco dopo le 23:00",
+    "noteHint": "Es. potrei finire un po' più tardi",
     "consent": "Confermo che i dati inseriti sono corretti e acconsento al loro utilizzo per la gestione delle prenotazioni, secondo l'informativa privacy (testo in preparazione).",
     "confirm": "Prenota",
     "sending": "Prenotazione in corso…",
@@ -61,11 +70,12 @@
   "errors": {
     "slot_taken": "Questo orario è appena stato prenotato da qualcun altro.",
     "consent_required": "Devi accettare il trattamento dei dati per prenotare.",
+    "apartment_invalid": "Numero di appartamento non valido.",
     "machine_not_available": "Questa macchina non è al momento disponibile.",
     "slot_not_aligned": "Orario non valido.",
-    "slot_out_of_hours": "Orario fuori dalla fascia prenotabile (08:00–23:00).",
+    "slot_out_of_hours": "Orario fuori dalla fascia prenotabile ({{from}}–{{to}}).",
     "slot_in_past": "Questo orario è già passato.",
-    "slot_too_far_ahead": "Si può prenotare al massimo con 30 giorni di anticipo.",
+    "slot_too_far_ahead": "Si può prenotare al massimo con {{days}} giorni di anticipo.",
     "generic": "Qualcosa è andato storto. Riprova.",
     "loadFailed": "Impossibile caricare le prenotazioni. Controlla la connessione."
   },
@@ -81,5 +91,64 @@
     "selectDate": "Scegli la data",
     "previousMonth": "Mese precedente",
     "nextMonth": "Mese successivo"
+  },
+  "admin": {
+    "title": "Gestione residenza",
+    "signOut": "Esci",
+    "notAdmin": "Questo account non è abilitato alla gestione. Chiedi a chi gestisce il database di aggiungerlo agli amministratori.",
+    "save": "Salva",
+    "saving": "Salvataggio…",
+    "saved": "Salvato ✓",
+    "saveFailed": "Salvataggio non riuscito. Riprova.",
+    "signIn": {
+      "title": "Accesso gestore",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Accedi",
+      "sending": "Accesso…",
+      "failed": "Email o password non corretti."
+    },
+    "settings": {
+      "title": "Residenza",
+      "residenceName": "Nome della residenza",
+      "residenceNameHint": "Es. Residenza Praticelli",
+      "apartmentCount": "Numero di appartamenti",
+      "apartmentCountHint": "Chi prenota potrà scegliere un appartamento da 1 a questo numero.",
+      "firstSlot": "Primo turno",
+      "lastSlot": "Ultimo turno",
+      "windowDays": "Giorni prenotabili in anticipo",
+      "keepNote": "Le prenotazioni già fatte restano valide anche se escono dai nuovi limiti.",
+      "invalid": "Controlla i valori: appartamenti da 1 a 999, giorni da 1 a 90, e il primo turno non può venire dopo l'ultimo."
+    },
+    "machines": {
+      "title": "Macchine",
+      "status": {
+        "available": "Disponibile",
+        "maintenance": "In manutenzione",
+        "retired": "Ritirata"
+      },
+      "setMaintenance": "Metti in manutenzione",
+      "setAvailable": "Rimetti disponibile",
+      "retire": "Ritira",
+      "restore": "Ripristina",
+      "retireHint": "Una macchina ritirata sparisce dall'app; le sue prenotazioni già fatte restano. In manutenzione resta visibile ma non prenotabile.",
+      "label": "Etichetta",
+      "labelHint": "Es. 1, 2 (distingue macchine dello stesso tipo)",
+      "addTitle": "Aggiungi una macchina",
+      "type": "Tipo",
+      "location": "Posizione",
+      "add": "Aggiungi"
+    },
+    "bookings": {
+      "title": "Prenotazioni in arrivo",
+      "refresh": "Aggiorna",
+      "empty": "Nessuna prenotazione in arrivo.",
+      "delete": "Elimina",
+      "confirmTitle": "Eliminare questa prenotazione?",
+      "confirmHint": "La persona non riceverà nessun avviso.",
+      "keep": "No, tienila",
+      "confirm": "Sì, elimina",
+      "deleting": "Eliminazione…"
+    }
   }
 }

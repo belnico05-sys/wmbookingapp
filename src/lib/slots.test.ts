@@ -1,6 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
-  bookableDays,
   dayRange,
   firstSelectableDay,
   isDaySelectable,
@@ -8,16 +7,19 @@ import {
   lastSelectableDay,
   slotsForDay,
 } from './slots'
-import { FIRST_SLOT_HOUR, LAST_SLOT_HOUR, SLOT_MINUTES, WINDOW_DAYS } from './config'
+import { SLOT_MINUTES, type BookingRules } from './config'
 
 const HOUR = 60 * 60 * 1000
 
+// This residence's defaults; the admin can change them per residence.
+const RULES: BookingRules = { firstSlotHour: 8, lastSlotHour: 22, windowDays: 30 }
+
 describe('slotsForDay', () => {
   it('returns one slot per hour from the first to the last slot hour', () => {
-    const slots = slotsForDay(new Date(2026, 8, 24))
-    expect(slots).toHaveLength(LAST_SLOT_HOUR - FIRST_SLOT_HOUR + 1)
-    expect(slots[0].start.getHours()).toBe(FIRST_SLOT_HOUR)
-    expect(slots.at(-1)!.start.getHours()).toBe(LAST_SLOT_HOUR)
+    const slots = slotsForDay(new Date(2026, 8, 24), RULES)
+    expect(slots).toHaveLength(15)
+    expect(slots[0].start.getHours()).toBe(8)
+    expect(slots.at(-1)!.start.getHours()).toBe(22)
     for (const s of slots) {
       expect(s.start.getMinutes()).toBe(0)
       expect(s.end.getTime() - s.start.getTime()).toBe(SLOT_MINUTES * 60_000)
@@ -28,15 +30,23 @@ describe('slotsForDay', () => {
     ['clocks go back', new Date(2026, 9, 25)],
     ['clocks go forward', new Date(2026, 2, 29)],
   ])('keeps local hours on the day the %s', (_, day) => {
-    const hours = slotsForDay(day).map((s) => s.start.getHours())
-    expect(hours[0]).toBe(FIRST_SLOT_HOUR)
-    expect(hours.at(-1)).toBe(LAST_SLOT_HOUR)
+    const hours = slotsForDay(day, RULES).map((s) => s.start.getHours())
+    expect(hours[0]).toBe(RULES.firstSlotHour)
+    expect(hours.at(-1)).toBe(RULES.lastSlotHour)
     expect(new Set(hours).size).toBe(hours.length)
   })
 })
 
+describe('slotsForDay with other opening hours', () => {
+  it("uses the residence's first and last hour", () => {
+    const hours = slotsForDay(new Date(2026, 8, 24), { ...RULES, firstSlotHour: 7, lastSlotHour: 20 })
+      .map((s) => s.start.getHours())
+    expect(hours).toEqual([7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
+  })
+})
+
 describe('isSlotOver', () => {
-  const [slot] = slotsForDay(new Date(2026, 8, 24))
+  const [slot] = slotsForDay(new Date(2026, 8, 24), RULES)
 
   it('is false while the slot is running', () => {
     expect(isSlotOver(slot, new Date(slot.start.getTime() + HOUR / 2))).toBe(false)
@@ -68,16 +78,21 @@ describe('booking window', () => {
     vi.useRealTimers()
   })
 
-  it('starts today and ends WINDOW_DAYS later', () => {
+  it('starts today and ends windowDays later', () => {
     expect(firstSelectableDay()).toEqual(new Date(2026, 8, 24))
-    expect(lastSelectableDay()).toEqual(new Date(2026, 8, 24 + WINDOW_DAYS))
-    expect(bookableDays()).toHaveLength(WINDOW_DAYS + 1)
+    expect(lastSelectableDay(RULES)).toEqual(new Date(2026, 8, 24 + 30))
   })
 
   it('accepts only days inside the window', () => {
-    expect(isDaySelectable(new Date(2026, 8, 23))).toBe(false)
-    expect(isDaySelectable(new Date(2026, 8, 24, 23, 59))).toBe(true)
-    expect(isDaySelectable(new Date(2026, 8, 24 + WINDOW_DAYS))).toBe(true)
-    expect(isDaySelectable(new Date(2026, 8, 24 + WINDOW_DAYS + 1))).toBe(false)
+    expect(isDaySelectable(new Date(2026, 8, 23), RULES)).toBe(false)
+    expect(isDaySelectable(new Date(2026, 8, 24, 23, 59), RULES)).toBe(true)
+    expect(isDaySelectable(new Date(2026, 8, 24 + 30), RULES)).toBe(true)
+    expect(isDaySelectable(new Date(2026, 8, 24 + 31), RULES)).toBe(false)
+  })
+
+  it("follows a different residence's window", () => {
+    const shortWindow = { ...RULES, windowDays: 7 }
+    expect(isDaySelectable(new Date(2026, 9, 1), shortWindow)).toBe(true) // 24 Sep + 7
+    expect(isDaySelectable(new Date(2026, 9, 2), shortWindow)).toBe(false)
   })
 })

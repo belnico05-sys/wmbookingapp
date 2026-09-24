@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import type { Booking, Machine } from '../lib/types'
 import { slotsForDay, isSlotOver, type Slot } from '../lib/slots'
 import { formatTime } from '../lib/format'
+import { useResidence } from '../residence/useResidence'
 
 interface Props {
   machine: Machine
@@ -18,6 +19,8 @@ interface Props {
 export function SlotList({ machine, day, bookings, myBookingIds, onPick, onCancel }: Props) {
   const { t, i18n } = useTranslation()
   const lang = i18n.language
+  const rules = useResidence().settings
+  const underMaintenance = !machine.active
 
   // Index this machine's bookings by slot-start timestamp for quick lookup.
   const byStart = new Map<number, Booking>()
@@ -29,9 +32,16 @@ export function SlotList({ machine, day, bookings, myBookingIds, onPick, onCance
 
   return (
     <ul className="flex flex-col gap-2">
-      {slotsForDay(day).map((slot) => {
+      {underMaintenance && (
+        <li className="rounded-2xl bg-amber-50 p-3.5 text-sm font-medium text-amber-900 ring-1 ring-amber-200 dark:bg-amber-500/10 dark:text-amber-200 dark:ring-amber-500/30">
+          🔧 {t('slots.maintenanceNotice')}
+        </li>
+      )}
+      {slotsForDay(day, rules).map((slot) => {
         const booking = byStart.get(slot.start.getTime())
         const over = isSlotOver(slot)
+        // Free slots can't be booked once over, or while the machine is under maintenance.
+        const unavailable = over || underMaintenance
         const mine = booking ? myBookingIds.has(booking.id) : false
         const range = t('slots.range', {
           start: formatTime(slot.start, lang),
@@ -89,18 +99,18 @@ export function SlotList({ machine, day, bookings, myBookingIds, onPick, onCance
         return (
           <li key={slot.start.toISOString()}>
             <button
-              disabled={over}
+              disabled={unavailable}
               onClick={() => onPick(slot)}
               className={`flex w-full items-center justify-between rounded-2xl p-3.5 text-sm transition ${
-                over
+                unavailable
                   ? 'cursor-not-allowed bg-transparent text-brand-300 ring-1 ring-brand-100 dark:text-slate-600 dark:ring-white/5'
                   : 'bg-white text-brand-900 ring-1 ring-emerald-200 hover:bg-emerald-50 hover:ring-emerald-400 dark:bg-white/[0.04] dark:text-slate-100 dark:ring-emerald-500/30 dark:hover:bg-emerald-500/10'
               }`}
             >
               <span className="font-bold">{range}</span>
-              {over ? (
+              {unavailable ? (
                 <span className="text-xs uppercase tracking-wide">
-                  {t('slots.over')}
+                  {over ? t('slots.over') : t('machines.maintenance')}
                 </span>
               ) : (
                 <span className="flex items-center gap-1.5 font-semibold text-emerald-600 dark:text-emerald-400">

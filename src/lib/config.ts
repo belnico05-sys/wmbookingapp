@@ -1,17 +1,21 @@
-// Booking rules, as seen by the app (what the calendar and slot list show).
+// Booking rules.
 //
-// The database enforces the same rules inside the create_booking function.
-// If you change a value here, ALSO write a new migration that updates
-// create_booking — the latest definition is in
-// supabase/migrations/20260615120000_extend_booking_window_30d.sql.
-
-/** First slot starts at this local hour. */
-export const FIRST_SLOT_HOUR = 8
-
-/** Last slot starts at this local hour (ends one hour later, 23:00). */
-export const LAST_SLOT_HOUR = 22
+// Opening hours and the booking window are set per residence in the admin
+// panel (table `settings`) and reach the app through useResidence(). The
+// database function create_booking enforces the same values.
+//
+// Slot length is fixed: changing it would break the alignment of existing
+// bookings. If you ever change it, also change the '1 hour' checks in
+// create_booking (latest: supabase/migrations/20260924120000_admin_settings.sql).
 
 export const SLOT_MINUTES = 60
 
-/** How many days ahead of today a slot can be booked (today + this many). */
-export const WINDOW_DAYS = 30
+/** The per-residence rules the calendar and slot list need. */
+export interface BookingRules {
+  /** Local hour at which the first slot starts (e.g. 8). */
+  firstSlotHour: number
+  /** Local hour at which the last slot starts (e.g. 22, ending at 23:00). */
+  lastSlotHour: number
+  /** How many days ahead of today a slot can be booked (today + this many). */
+  windowDays: number
+}

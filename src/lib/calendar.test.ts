@@ -25,7 +25,8 @@ describe('selectableMonths', () => {
 
   it('covers every month touched by the booking window', () => {
     vi.useFakeTimers({ now: new Date(2026, 8, 24, 12, 0) })
-    const months = selectableMonths().map((m) => [m.year, m.month])
+    const rules = { firstSlotHour: 8, lastSlotHour: 22, windowDays: 30 }
+    const months = selectableMonths(rules).map((m) => [m.year, m.month])
     expect(months).toEqual([
       [2026, 8],
       [2026, 9],

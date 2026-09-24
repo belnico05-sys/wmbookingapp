@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { isSameDay, isDaySelectable, firstSelectableDay, dayStart } from '../lib/slots'
 import { selectableMonths, weekdayLabels, formatEuDate } from '../lib/calendar'
+import { useResidence } from '../residence/useResidence'
 import { Sheet } from './ui/Sheet'
 
 interface Props {
@@ -13,7 +14,8 @@ export function DatePicker({ selected, onSelect }: Props) {
   const { t, i18n } = useTranslation()
   const [open, setOpen] = useState(false)
   const today = firstSelectableDay()
-  const months = selectableMonths()
+  const rules = useResidence().settings
+  const months = selectableMonths(rules)
   const weekdays = weekdayLabels(i18n.language)
   const monthTitleFmt = new Intl.DateTimeFormat(i18n.language, {
     month: 'long',
@@ -93,7 +95,7 @@ export function DatePicker({ selected, onSelect }: Props) {
             ))}
             {grid.weeks.flat().map((day, i) => {
               if (!day) return <span key={i} />
-              const selectable = isDaySelectable(day)
+              const selectable = isDaySelectable(day, rules)
               const isSelected = isSameDay(day, selected)
               const isToday = isSameDay(day, today)
               return (

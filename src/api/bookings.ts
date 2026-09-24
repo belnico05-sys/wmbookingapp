@@ -13,6 +13,7 @@ import { db } from './client'
 const BOOKING_ERROR_CODES = [
   'slot_taken',
   'consent_required',
+  'apartment_invalid',
   'machine_not_available',
   'slot_not_aligned',
   'slot_out_of_hours',
@@ -60,6 +61,18 @@ export async function fetchDayBookings(day: Date): Promise<Booking[]> {
     .select('id, machine_id, slot_start, name, apartment, note')
     .gte('slot_start', from.toISOString())
     .lt('slot_start', to.toISOString())
+  if (error) throw error
+  return (data as BookingRow[]).map(toBooking)
+}
+
+/** All bookings from today onwards (every machine), soonest first. Throws on failure. */
+export async function fetchUpcomingBookings(): Promise<Booking[]> {
+  const { from } = dayRange(new Date())
+  const { data, error } = await db()
+    .from('bookings')
+    .select('id, machine_id, slot_start, name, apartment, note')
+    .gte('slot_start', from.toISOString())
+    .order('slot_start')
   if (error) throw error
   return (data as BookingRow[]).map(toBooking)
 }

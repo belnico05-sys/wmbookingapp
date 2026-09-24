@@ -1,18 +1,16 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { Machine } from '../lib/types'
 import { SLOT_MINUTES } from '../lib/config'
 import { myUpcomingBookings, type MyBooking } from '../auth/identity'
 import { formatDayLong, formatTime } from '../lib/format'
+import { machineName } from '../lib/machines'
+import { useResidence } from '../residence/useResidence'
 import { CancelBookingSheet } from './CancelBookingSheet'
 
-interface Props {
-  machines: Machine[]
-}
-
 /** List of the user's upcoming bookings, each with a cancel button. */
-export function MyBookings({ machines }: Props) {
+export function MyBookings() {
   const { t, i18n } = useTranslation()
+  const { machines } = useResidence()
   const [list, setList] = useState<MyBooking[]>(myUpcomingBookings)
   const [toCancel, setToCancel] = useState<MyBooking | null>(null)
 
@@ -37,7 +35,7 @@ export function MyBookings({ machines }: Props) {
               >
                 <span className="text-brand-900 dark:text-slate-100">
                   <span className="font-semibold">
-                    {machine ? t(`machines.${machine.code}`) : `#${b.machineId}`}
+                    {machine ? machineName(t, machine) : `#${b.machineId}`}
                   </span>
                   <br />
                   <span className="text-brand-600 dark:text-slate-300">

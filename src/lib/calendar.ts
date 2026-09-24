@@ -1,3 +1,4 @@
+import type { BookingRules } from './config'
 import { firstSelectableDay, lastSelectableDay } from './slots'
 
 export interface MonthGrid {
@@ -30,9 +31,9 @@ export function monthGrid(year: number, month: number): MonthGrid {
 }
 
 /** The months (current … last selectable) that the calendar should display. */
-export function selectableMonths(): MonthGrid[] {
+export function selectableMonths(rules: BookingRules): MonthGrid[] {
   const start = firstSelectableDay()
-  const end = lastSelectableDay()
+  const end = lastSelectableDay(rules)
   const grids: MonthGrid[] = []
   const cursor = new Date(start.getFullYear(), start.getMonth(), 1)
   const endMonth = new Date(end.getFullYear(), end.getMonth(), 1)

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useResidence } from '../residence/useResidence'
 
 interface Props {
   /** Left-side element (e.g. a back button). Logo+title show when absent. */
@@ -10,6 +11,7 @@ interface Props {
 
 export function BrandHeader({ left, right }: Props) {
   const { t } = useTranslation()
+  const { residenceName } = useResidence().settings
 
   return (
     <header className="sticky top-0 z-20 bg-brand-700 text-white shadow-lg shadow-brand-900/20 dark:bg-brand-800">
@@ -24,7 +26,7 @@ export function BrandHeader({ left, right }: Props) {
           )}
           <div className="min-w-0">
             <h1 className="truncate text-lg font-bold leading-tight">{t('app.title')}</h1>
-            <p className="truncate text-xs text-brand-100">{t('app.subtitle')}</p>
+            <p className="truncate text-xs text-brand-100">{residenceName || t('app.subtitle')}</p>
           </div>
         </div>
         {right && <div className="flex shrink-0 items-center gap-2">{right}</div>}

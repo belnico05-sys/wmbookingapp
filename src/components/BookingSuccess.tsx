@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import type { Machine } from '../lib/types'
+import { machineName } from '../lib/machines'
 import type { Slot } from '../lib/slots'
 import { downloadIcs, googleCalendarUrl } from '../lib/ics'
 import { SlotPill } from './SlotPill'
@@ -15,7 +16,7 @@ export function BookingSuccess({ machine, slot, onClose }: Props) {
   const { t } = useTranslation()
 
   const reminderEvent = {
-    title: t('reminder.summary', { machine: t(`machines.${machine.code}`) }),
+    title: t('reminder.summary', { machine: machineName(t, machine) }),
     description: t('reminder.description'),
     start: slot.start,
     end: slot.end,

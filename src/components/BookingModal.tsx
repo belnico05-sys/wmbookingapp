@@ -1,10 +1,19 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Machine } from '../lib/types'
+import { machineName } from '../lib/machines'
 import type { Slot } from '../lib/slots'
 import { BookingError } from '../api/bookings'
 import { createMyBooking, getProfile } from '../auth/identity'
+import { useResidence } from '../residence/useResidence'
 import { Sheet } from './ui/Sheet'
+import {
+  errorBoxClass,
+  inputClass,
+  labelClass,
+  primaryButtonClass,
+  secondaryButtonClass,
+} from './ui/styles'
 import { SlotPill } from './SlotPill'
 import { BookingSuccess } from './BookingSuccess'
 
@@ -16,12 +25,20 @@ interface Props {
   onBooked: () => void
 }
 
+function isValidApartment(value: string | undefined, count: number): boolean {
+  return value !== undefined && /^[0-9]+$/.test(value) && Number(value) >= 1 && Number(value) <= count
+}
+
 /** Booking form (name, apartment, note, mandatory consent), then the success step. */
 export function BookingModal({ machine, slot, onClose, onBooked }: Props) {
   const { t } = useTranslation()
+  const { apartmentCount, firstSlotHour, lastSlotHour, windowDays } = useResidence().settings
   const profile = getProfile()
   const [name, setName] = useState(profile?.name ?? '')
-  const [apartment, setApartment] = useState(profile?.apartment ?? '')
+  // Prefill only a remembered apartment that is still valid (1 … apartmentCount).
+  const [apartment, setApartment] = useState(() =>
+    isValidApartment(profile?.apartment, apartmentCount) ? String(Number(profile!.apartment)) : '',
+  )
   const [note, setNote] = useState('')
   const [consent, setConsent] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -29,7 +46,7 @@ export function BookingModal({ machine, slot, onClose, onBooked }: Props) {
   const [succeeded, setSucceeded] = useState(false)
 
   const canSubmit =
-    consent && name.trim().length >= 2 && apartment.trim().length >= 1 && !submitting
+    consent && name.trim().length >= 2 && apartment !== '' && !submitting
 
   async function submit() {
     setSubmitting(true)
@@ -45,17 +62,21 @@ export function BookingModal({ machine, slot, onClose, onBooked }: Props) {
       })
     } catch (e) {
       const code = e instanceof BookingError ? e.code : 'generic'
-      setError(t(`errors.${code}`))
+      // Values for the messages that mention the residence's rules.
+      const pad = (h: number) => `${String(h).padStart(2, '0')}:00`
+      setError(
+        t(`errors.${code}`, {
+          from: pad(firstSlotHour),
+          to: pad(lastSlotHour + 1),
+          days: windowDays,
+        }),
+      )
       setSubmitting(false)
       return
     }
     onBooked()
     setSucceeded(true)
   }
-
-  const inputClass =
-    'rounded-xl bg-brand-50 p-2.5 text-brand-900 ring-1 ring-brand-200 outline-none placeholder:text-brand-300 focus:ring-2 focus:ring-brand-500 dark:bg-white/[0.06] dark:text-slate-100 dark:ring-white/15 dark:placeholder:text-slate-400'
-  const labelClass = 'flex flex-col gap-1 text-sm font-medium text-brand-800 dark:text-slate-200'
 
   if (succeeded) {
     return (
@@ -68,7 +89,7 @@ export function BookingModal({ machine, slot, onClose, onBooked }: Props) {
   return (
     <Sheet onClose={onClose}>
       <h2 className="text-lg font-bold text-brand-900 dark:text-slate-100">
-        {t('booking.title', { machine: t(`machines.${machine.code}`) })}
+        {t('booking.title', { machine: machineName(t, machine) })}
       </h2>
       <SlotPill start={slot.start} />
 
@@ -86,12 +107,20 @@ export function BookingModal({ machine, slot, onClose, onBooked }: Props) {
 
         <label className={labelClass}>
           {t('booking.apartment')}
-          <input
+          <select
             className={inputClass}
             value={apartment}
             onChange={(e) => setApartment(e.target.value)}
-            placeholder={t('booking.apartmentPlaceholder')}
-          />
+          >
+            <option value="" disabled>
+              {t('booking.apartmentPlaceholder')}
+            </option>
+            {Array.from({ length: apartmentCount }, (_, i) => String(i + 1)).map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
         </label>
 
         <label className={labelClass}>
@@ -116,20 +145,20 @@ export function BookingModal({ machine, slot, onClose, onBooked }: Props) {
         </label>
 
         {error && (
-          <p className="rounded-xl bg-accent-100 px-3 py-2 text-sm font-medium text-accent-700 dark:bg-accent-700/20 dark:text-accent-100">
+          <p className={errorBoxClass}>
             {error}
           </p>
         )}
 
         <div className="mt-1 flex gap-2.5">
           <button
-            className="flex-1 rounded-xl py-3 text-sm font-semibold text-brand-700 ring-1 ring-brand-200 transition hover:bg-brand-50 dark:text-slate-200 dark:ring-white/15 dark:hover:bg-white/5"
+            className={`flex-1 ${secondaryButtonClass}`}
             onClick={onClose}
           >
             {t('booking.close')}
           </button>
           <button
-            className="flex-1 rounded-xl bg-brand-600 py-3 text-sm font-semibold text-white shadow-md shadow-brand-600/30 transition hover:bg-brand-700 disabled:opacity-40 disabled:shadow-none"
+            className={`flex-1 ${primaryButtonClass}`}
             disabled={!canSubmit}
             onClick={submit}
           >

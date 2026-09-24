@@ -1,4 +1,4 @@
-import { FIRST_SLOT_HOUR, LAST_SLOT_HOUR, SLOT_MINUTES, WINDOW_DAYS } from './config'
+import { SLOT_MINUTES, type BookingRules } from './config'
 
 export interface Slot {
   start: Date
@@ -17,33 +17,23 @@ export function firstSelectableDay(): Date {
   return dayStart(new Date())
 }
 
-/** The last selectable day (today + WINDOW_DAYS). */
-export function lastSelectableDay(): Date {
+/** The last selectable day (today + windowDays). */
+export function lastSelectableDay(rules: BookingRules): Date {
   const d = firstSelectableDay()
-  d.setDate(d.getDate() + WINDOW_DAYS)
+  d.setDate(d.getDate() + rules.windowDays)
   return d
 }
 
-/** Whether a day falls inside the bookable window [today, today + WINDOW_DAYS]. */
-export function isDaySelectable(day: Date): boolean {
+/** Whether a day falls inside the bookable window [today, today + windowDays]. */
+export function isDaySelectable(day: Date, rules: BookingRules): boolean {
   const d = dayStart(day).getTime()
-  return d >= firstSelectableDay().getTime() && d <= lastSelectableDay().getTime()
-}
-
-/** The bookable days: today through today + WINDOW_DAYS (inclusive). */
-export function bookableDays(): Date[] {
-  const today = firstSelectableDay()
-  return Array.from({ length: WINDOW_DAYS + 1 }, (_, i) => {
-    const d = new Date(today)
-    d.setDate(d.getDate() + i)
-    return d
-  })
+  return d >= firstSelectableDay().getTime() && d <= lastSelectableDay(rules).getTime()
 }
 
 /** All slots of the given day, first to last. */
-export function slotsForDay(day: Date): Slot[] {
+export function slotsForDay(day: Date, rules: BookingRules): Slot[] {
   const slots: Slot[] = []
-  for (let hour = FIRST_SLOT_HOUR; hour <= LAST_SLOT_HOUR; hour++) {
+  for (let hour = rules.firstSlotHour; hour <= rules.lastSlotHour; hour++) {
     const start = dayStart(day)
     start.setHours(hour)
     const end = new Date(start.getTime() + SLOT_MINUTES * 60 * 1000)

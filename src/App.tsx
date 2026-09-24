@@ -1,9 +1,13 @@
+import { lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { isSupabaseConfigured } from './api/client'
-import { useMachines } from './hooks/useMachines'
+import { ResidenceProvider } from './residence/ResidenceProvider'
 import { BookingPage } from './pages/BookingPage'
 import { MyBookingsPage } from './pages/MyBookingsPage'
+
+// Loaded only when someone opens /#/admin, so students don't download it.
+const AdminPage = lazy(() => import('./pages/AdminPage').then((m) => ({ default: m.AdminPage })))
 
 export default function App() {
   const { t } = useTranslation()
@@ -21,27 +25,24 @@ export default function App() {
     )
   }
 
-  return <ConfiguredApp />
-}
-
-function ConfiguredApp() {
-  const { t } = useTranslation()
-  const { machines, loadFailed } = useMachines()
-
-  if (loadFailed) {
-    return <p className="mx-auto max-w-md p-6 text-sm text-accent-600">{t('errors.loadFailed')}</p>
-  }
-  if (!machines) {
-    return <p className="mx-auto max-w-md p-6 text-sm text-brand-500">{t('common.loading')}</p>
-  }
-
   return (
-    <HashRouter>
-      <Routes>
-        <Route path="/" element={<BookingPage machines={machines} />} />
-        <Route path="/prenotazioni" element={<MyBookingsPage machines={machines} />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </HashRouter>
+    <ResidenceProvider>
+      <HashRouter>
+        <Routes>
+          <Route path="/" element={<BookingPage />} />
+          <Route path="/prenotazioni" element={<MyBookingsPage />} />
+          {/* Not linked from the student UI: the manager bookmarks it. */}
+          <Route
+            path="/admin"
+            element={
+              <Suspense fallback={<p className="mx-auto max-w-md p-6 text-sm text-brand-500">{t('common.loading')}</p>}>
+                <AdminPage />
+              </Suspense>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </HashRouter>
+    </ResidenceProvider>
   )
 }

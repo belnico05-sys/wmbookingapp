@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import type { Booking, Machine } from '../lib/types'
@@ -16,6 +16,22 @@ interface Props {
   machines: Machine[]
 }
 
+/** IDs of the bookings made from this device. */
+function ownBookingIds(): Set<string> {
+  return new Set(getMyBookings().map((b) => b.id))
+}
+
+/** All bookings of one day; null if the request failed. */
+async function fetchDayBookings(day: Date): Promise<Booking[] | null> {
+  const { from, to } = dayRange(day)
+  const { data, error } = await db()
+    .from('bookings')
+    .select('id, machine_id, slot_start, name, apartment, note')
+    .gte('slot_start', from.toISOString())
+    .lt('slot_start', to.toISOString())
+  return error ? null : (data as Booking[])
+}
+
 export function BookingPage({ machines }: Props) {
   const { t } = useTranslation()
 
@@ -24,33 +40,30 @@ export function BookingPage({ machines }: Props) {
     machines[0]?.id ?? null,
   )
   const [bookings, setBookings] = useState<Booking[]>([])
+  const [myBookingIds, setMyBookingIds] = useState(ownBookingIds)
   const [picked, setPicked] = useState<Slot | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [myKey, setMyKey] = useState(0)
-
-  const myBookingIds = useMemo(
-    () => new Set(getMyBookings().map((b) => b.id)),
-    [myKey, bookings],
-  )
-
-  const loadBookings = useCallback(async () => {
-    const { from, to } = dayRange(selectedDay)
-    const { data, error } = await db()
-      .from('bookings')
-      .select('id, machine_id, slot_start, name, apartment, note')
-      .gte('slot_start', from.toISOString())
-      .lt('slot_start', to.toISOString())
-    if (error) {
-      setError(t('errors.loadFailed'))
-      return
-    }
-    setError(null)
-    setBookings(data as Booking[])
-  }, [selectedDay, t])
+  // Bumped to refetch the visible day (after booking, or on a Realtime event).
+  const [reloadTick, setReloadTick] = useState(0)
+  const reload = useCallback(() => setReloadTick((n) => n + 1), [])
 
   useEffect(() => {
-    loadBookings()
-  }, [loadBookings])
+    // Ignore replies that arrive after the day changed (fast tapping).
+    let stale = false
+    fetchDayBookings(selectedDay).then((data) => {
+      if (stale) return
+      if (data === null) {
+        setError(t('errors.loadFailed'))
+        return
+      }
+      setError(null)
+      setBookings(data)
+      setMyBookingIds(ownBookingIds())
+    })
+    return () => {
+      stale = true
+    }
+  }, [selectedDay, reloadTick, t])
 
   // Realtime: any change to bookings refreshes the visible day.
   useEffect(() => {
@@ -59,13 +72,13 @@ export function BookingPage({ machines }: Props) {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'bookings' },
-        () => loadBookings(),
+        reload,
       )
       .subscribe()
     return () => {
       db().removeChannel(channel)
     }
-  }, [loadBookings])
+  }, [reload])
 
   const selectedMachine = machines.find((m) => m.id === selectedMachineId) ?? null
 
@@ -124,10 +137,7 @@ export function BookingPage({ machines }: Props) {
           machine={selectedMachine}
           slot={picked}
           onClose={() => setPicked(null)}
-          onBooked={() => {
-            setMyKey((k) => k + 1)
-            loadBookings()
-          }}
+          onBooked={reload}
         />
       )}
     </div>

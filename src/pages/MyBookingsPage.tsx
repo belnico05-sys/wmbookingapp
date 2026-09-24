@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import type { Machine } from '../lib/types'
@@ -11,7 +10,6 @@ interface Props {
 
 export function MyBookingsPage({ machines }: Props) {
   const { t } = useTranslation()
-  const [reloadKey, setReloadKey] = useState(0)
 
   return (
     <div className="min-h-screen pb-12">
@@ -40,11 +38,7 @@ export function MyBookingsPage({ machines }: Props) {
       />
 
       <main className="mx-auto max-w-md px-4">
-        <MyBookings
-          machines={machines}
-          reloadKey={reloadKey}
-          onChanged={() => setReloadKey((k) => k + 1)}
-        />
+        <MyBookings machines={machines} />
       </main>
     </div>
   )

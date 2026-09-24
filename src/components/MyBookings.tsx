@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Machine } from '../lib/types'
 import { SLOT_MINUTES } from '../lib/config'
@@ -8,9 +8,6 @@ import { formatDayLong, formatTime } from '../lib/format'
 
 interface Props {
   machines: Machine[]
-  /** Bumped by the parent whenever a booking is added, to reload the list. */
-  reloadKey: number
-  onChanged: () => void
 }
 
 /** Bookings whose slot has not fully ended yet. */
@@ -21,13 +18,9 @@ function futureBookings(): MyBooking[] {
     .sort((a, b) => a.slotStart.localeCompare(b.slotStart))
 }
 
-export function MyBookings({ machines, reloadKey, onChanged }: Props) {
+export function MyBookings({ machines }: Props) {
   const { t, i18n } = useTranslation()
   const [list, setList] = useState<MyBooking[]>(futureBookings)
-
-  useEffect(() => {
-    setList(futureBookings())
-  }, [reloadKey])
 
   async function cancel(b: MyBooking) {
     if (!window.confirm(t('myBookings.cancelConfirm'))) return
@@ -41,7 +34,6 @@ export function MyBookings({ machines, reloadKey, onChanged }: Props) {
     }
     removeMyBooking(b.id)
     setList(futureBookings())
-    onChanged()
   }
 
   return (

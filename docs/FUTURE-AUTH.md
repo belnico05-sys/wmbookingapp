@@ -50,11 +50,21 @@ The code is already arranged for this:
   - `myBookingIds()` / `myUpcomingBookings()` → query `bookings where user_id = me`
     (these become async, so update their few callers)
   - `createMyBooking()` / `cancelMyBooking()` → call the RPCs without tokens
-- **`src/App.tsx`**: add a login gate before `ConfiguredApp` (sign-in screen with the
-  university button, `supabase.auth.signInWithOAuth`).
+- **`src/App.tsx`**: add a login gate around the student routes (sign-in screen with
+  the university button, `supabase.auth.signInWithOAuth`). The admin panel's
+  session handling (`api/admin.ts`, `hooks/useAdminSession.ts`) is a working example.
 - **`BookingModal`**: prefill the name from the account and drop the "device only"
   hints in the locale files.
 - Components, hooks and `api/` don't otherwise need changes.
+
+## Admins
+
+The admin panel already uses Supabase Auth (email + password for the manager)
+and an `admins` table checked by `is_admin()`. That keeps working unchanged
+when students sign in too: a student is just a signed-in user **without** a row
+in `admins`. The manager could then also sign in through the university; you'd
+simply add their user id to `admins`. Even when students can sign in, keep public
+email/password sign-ups off: only the university provider should create accounts.
 
 ## Privacy
 

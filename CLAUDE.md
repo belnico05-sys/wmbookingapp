@@ -22,12 +22,14 @@ students on their phones; the app is shared via link/QR code.
 
 ## Domain rules
 
-- Entities: **machines** (2 internal washers, 1 external; 1 internal dryer, 1 external), **time slots**,
-  **bookings** (name, apartment number, machine, slot).
+- Entities: **machines** (configured per residence in the admin panel; the
+  original residence has 2 internal washers, 1 external; 1 internal dryer,
+  1 external), **time slots**, **bookings** (name, apartment number 1–N,
+  machine, slot), **settings** (one row per residence).
 - **No double booking**: one booking per machine per slot, enforced at the
   database level (unique/exclusion constraint), never only in the UI.
-- Slot granularity and opening hours are configurable. Defaults to confirm
-  with the user during implementation (e.g. 1-hour slots, quiet hours at night).
+- 1-hour slots (fixed). Opening hours, booking window and apartment count
+  are set by the manager in the admin panel (defaults 08:00–23:00, 30 days, 34).
 - Cancellation: users can free a slot they booked themselves.
 
 ## Identification & privacy
@@ -47,10 +49,14 @@ students on their phones; the app is shared via link/QR code.
 ## Code structure
 
 Layers (details in `docs/ARCHITECTURE.md`): `pages → components/hooks → auth →
-api → Supabase`. Only `src/api/` talks to Supabase. Only `src/auth/identity.ts`
+api → Supabase`. Only `src/api/` talks to Supabase. Per-residence settings
+(apartments, hours, window, name) and machines come from the DB via
+`useResidence()` (`src/residence/`), edited in the admin panel (`/#/admin`,
+`components/admin/`). One deployment + Supabase project per residence. Only `src/auth/identity.ts`
 knows who the user is / which bookings are theirs (it is the seam for the
 planned university login, `docs/FUTURE-AUTH.md`). `src/lib/` is pure helpers.
-Booking rules in `src/lib/config.ts` must match `create_booking` in SQL.
+Only slot length (`SLOT_MINUTES`) and timezone are still duplicated between
+code and `create_booking` in SQL.
 Keep `README.md` and `docs/` up to date when changing structure: the code is
 meant to be handed over to other programmers.
 

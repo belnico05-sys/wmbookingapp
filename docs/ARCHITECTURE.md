@@ -7,6 +7,10 @@ repeats some of them only to show a nice UI.
 
 ## Data flow
 
+At startup `residence/ResidenceProvider` loads the residence's `settings` row and
+its machines. Every component reads them with `useResidence()`. The admin panel
+calls `reload()` after each change.
+
 ```
 pages/BookingPage ──► hooks/useDayBookings ──► api/bookings.fetchDayBookings ──► table bookings (read)
         │                     ▲
@@ -20,6 +24,7 @@ Each layer has one job:
 
 | Layer         | Knows about                            | Must not                                  |
 | ------------- | -------------------------------------- | ----------------------------------------- |
+| `residence/`  | Settings + machines, loaded once       | Hold per-screen state                     |
 | `pages/`      | Screen layout, which sheet is open     | Call Supabase or localStorage             |
 | `components/` | Rendering + user input                 | Call Supabase                             |
 | `hooks/`      | Loading state, refetching, Realtime    | Render anything                           |
@@ -35,8 +40,9 @@ types in `lib/types.ts`, so nothing outside `api/` knows a column name.
 The app uses Supabase's **anon key**, which is public by design (it ships in the
 JavaScript). Everything below is enforced by Postgres, not by the frontend.
 
-- **`machines`**: anyone can read; no one can write (changes only via migrations
-  or the SQL Editor).
+- **`machines`** and **`settings`** (one row: residence name, apartment count,
+  opening hours, booking window): anyone can read them. Clients cannot write
+  them directly; only the admin functions below change them.
 - **`bookings`**: anyone can read (the schedule is public, like the paper sheet).
   Direct `insert/update/delete` is revoked from everyone.
 - **Writes only through two `security definer` functions:**
@@ -44,6 +50,14 @@ JavaScript). Everything below is enforced by Postgres, not by the frontend.
     opening hours, not in the past, not too far ahead. It inserts the booking plus
     a random **cancel token** and returns both.
   - `cancel_booking(id, token)` deletes the booking only if the token matches.
+  - `create_booking` also checks that the apartment is a number between 1 and
+    `settings.apartment_count`, and reads the opening hours and window from `settings`.
+- **Admin functions** (`admin_update_settings`, `admin_add_machine`,
+  `admin_update_machine`, `admin_delete_booking`): callable only by signed-in
+  users, and each one first checks `is_admin()`, meaning the caller must be in the
+  **`admins`** table (Supabase Auth user ids). `admins` itself is readable by no
+  one. Public sign-ups are disabled in the dashboard, so the only accounts are
+  the ones the maintainer creates.
 - **`booking_secrets`** holds the cancel tokens. No one can read it; only the two
   functions use it.
 - **No double booking:** a `unique (machine_id, slot_start)` constraint on
@@ -59,27 +73,27 @@ The cancel token is stored only in the booking phone's `localStorage` (see
 ### Error codes
 
 `create_booking` raises its error as a plain code (`slot_taken`,
-`consent_required`, `machine_not_available`, `slot_not_aligned`,
+`consent_required`, `apartment_invalid`, `machine_not_available`, `slot_not_aligned`,
 `slot_out_of_hours`, `slot_in_past`, `slot_too_far_ahead`). `api/bookings.ts`
 turns it into a `BookingError`, and the UI shows `t('errors.<code>')`. When you add a
 new code in SQL, add it to `BOOKING_ERROR_CODES` and to both locale files.
 
-## Rules that live in two places
+## Where the booking rules live
 
-The UI needs these to draw the calendar and slots. The database needs them to
-refuse bad bookings. **Change both together.**
+Opening hours, booking window and apartment count live in **one place**: the
+`settings` table, edited from the admin panel. The UI reads them through
+`useResidence()`, and `create_booking` reads the same row.
 
-| Rule                     | Frontend (`src/lib/config.ts`) | Database (`create_booking`)            |
-| ------------------------ | ------------------------------ | -------------------------------------- |
-| First slot starts        | `FIRST_SLOT_HOUR = 8`          | `extract(hour …) < 8`                  |
-| Last slot starts         | `LAST_SLOT_HOUR = 22`          | `extract(hour …) > 22`                 |
-| Slot length              | `SLOT_MINUTES = 60`            | `interval '1 hour'` + minute must be 0 |
-| Booking window           | `WINDOW_DAYS = 30`             | `interval '31 days'` (see comment)     |
-| Timezone                 | the phone's local time         | `'Europe/Rome'`                        |
+Two rules are still in code, on both sides. **Change both together:**
+
+| Rule        | Frontend                           | Database (`create_booking`)            |
+| ----------- | ---------------------------------- | -------------------------------------- |
+| Slot length | `SLOT_MINUTES = 60` in `config.ts` | `interval '1 hour'` + minute must be 0 |
+| Timezone    | the phone's local time             | `'Europe/Rome'`                        |
 
 The latest `create_booking` definition is in
-`supabase/migrations/20260615120000_extend_booking_window_30d.sql`. The one in the
-init migration is out of date.
+`supabase/migrations/20260924120000_admin_settings.sql`. Older migrations contain
+out-of-date versions.
 
 ## Database changes
 

@@ -7,8 +7,14 @@ book a free 1-hour slot with their name and apartment number.
 
 **Live:** https://wmbookingapp.vercel.app/
 
-- No accounts: users identify with name + apartment. A consent checkbox is
-  mandatory before every booking.
+- No student accounts: users identify with name + apartment number (1 to the
+  number of apartments set by the manager). A consent checkbox is mandatory
+  before every booking.
+- The residence's manager has an **admin panel** (`/#/admin`) to set the
+  residence name, number of apartments, opening hours and booking window, to
+  add machines or put them under maintenance, and to delete bookings.
+- **One copy per residence:** each residence runs its own deployment + database
+  (see [Set up a new residence](#set-up-a-new-residence)).
 - A booking can be cancelled (the "−" button, or the 📋 page) only from the
   device that made it.
 - The schedule updates live on every phone.
@@ -53,17 +59,23 @@ Vite prints a `Network:` URL. Open it on your phone.
 src/
   api/          The ONLY code that talks to Supabase
     client.ts     Supabase client (reads .env.local)
+    settings.ts   fetchSettings(): the residence's configuration
     machines.ts   fetchMachines()
     bookings.ts   fetchDayBookings(), createBooking(), cancelBooking(), live updates
+    admin.ts      Manager sign-in + admin-only writes
   auth/
-    identity.ts   Who the user is + which bookings are theirs (swap this for a real login)
-  hooks/        React hooks that load data: useMachines, useDayBookings
-  pages/        One component per screen: BookingPage (/), MyBookingsPage (/prenotazioni)
+    identity.ts   Who the student is + which bookings are theirs (swap this for a real login)
+  residence/    Loads settings + machines once; useResidence() gives them to any component
+  hooks/        React hooks that load data: useDayBookings, useAdminSession
+  pages/        One component per screen: BookingPage (/), MyBookingsPage (/prenotazioni),
+                AdminPage (/admin)
   components/   UI pieces (SlotList, BookingModal, CancelBookingSheet, DatePicker, …)
-    ui/Sheet.tsx  The shared bottom-sheet / dialog shell
+    admin/        The admin panel sections
+    ui/           Sheet (shared bottom-sheet / dialog shell), styles.ts (shared classes)
   lib/          Pure helpers, no React, no network
-    config.ts     Booking rules: opening hours, slot length, booking window
-    slots.ts      Slot and day maths
+    config.ts     Slot length + the BookingRules type
+    slots.ts      Slot and day maths (takes the residence's rules as a parameter)
+    machines.ts   machineName(): "Lavatrice 1 (interna)" from type + label + location
     calendar.ts   Month grid for the date picker
     format.ts     Date/time formatting
     ics.ts        Calendar reminder (.ics file + Google Calendar link)
@@ -79,26 +91,56 @@ docs/
 The dependency direction is one-way: **pages → components/hooks → auth → api →
 Supabase**. Components never import from `api/client.ts` directly.
 
+## Admin panel
+
+Open `https://<your-site>/#/admin` and sign in with the manager's email +
+password. There is no link in the student UI, so the manager bookmarks it.
+
+| Section   | What it does                                                                  |
+| --------- | ----------------------------------------------------------------------------- |
+| Residence | Name shown in the header, number of apartments, first/last slot, days bookable ahead |
+| Machines  | Put under maintenance (greyed out, not bookable), retire/restore, rename (label), add |
+| Bookings  | All upcoming bookings; delete fake or wrong ones                              |
+
+Changes apply to the app immediately. A settings change never deletes existing
+bookings. Everything is enforced by the database, not only by the panel.
+
+**Create the manager account** (once per residence, in the Supabase dashboard):
+1. Authentication → Sign In / Providers → turn **off** "Allow new users to sign up".
+2. Authentication → Users → **Add user** → email + password, tick "Auto Confirm User".
+3. SQL Editor → run
+   `insert into admins (user_id) select id from auth.users where email = 'manager@example.com';`
+
+To remove a manager:
+`delete from admins where user_id = (select id from auth.users where email = '...');`
+
+## Set up a new residence
+
+Each residence gets its own copy, with no code changes:
+1. **Supabase:** create a new project (free tier, EU region). In the SQL Editor, run
+   every file in `supabase/migrations/` **in filename order**.
+2. **Manager account:** follow the three steps above.
+3. **Vercel:** import this GitHub repo as a new project and set the environment
+   variables `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` from the new
+   Supabase project (Project Settings → API).
+4. Open `/#/admin` on the new site and set the name, apartments and hours.
+   The machines start as the 5 from the original residence: rename, retire or
+   add machines to match.
+
 ## Common changes
 
 **Add or change UI text.** Never hardcode strings in components. Add the key to
 **both** `src/locales/it.json` and `en.json`, then use `t('group.key')`. Write the
 Italian first; it's the main audience.
 
-**Change opening hours, slot length or how far ahead people can book.** Change
-`src/lib/config.ts` **and** write a new migration that updates the matching check
-in the `create_booking` function (copy its latest version from
-`supabase/migrations/`). If you only change one side, the UI and the database
-disagree. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#rules-that-live-in-two-places).
+**Change opening hours, apartments, booking window or machines.** Use the admin
+panel. No code change is needed.
 
-**Mark a machine out of order.** In the Supabase SQL Editor:
-`update machines set active = false where code = 'washer_int_1';` (set it back to
-`true` when it's fixed). The button greys out and the database refuses new
-bookings on it. Existing bookings stay.
-
-**Add a machine.** Write a migration with
-`insert into machines (id, code, type, location) values (6, 'washer_int_3', 'washer', 'internal');`
-then add `machines.washer_int_3` to both locale files.
+**Change the slot length (1 hour).** This is the one rule still in code:
+`SLOT_MINUTES` in `src/lib/config.ts` **and** the `'1 hour'` checks in the
+`create_booking` function (write a new migration). Existing bookings would no
+longer line up with the new slots, so think twice. See
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#where-the-booking-rules-live).
 
 **Change the database schema.** Always through a new file in
 `supabase/migrations/` committed to the repo, never only in the dashboard. See

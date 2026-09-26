@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SLOT_MINUTES } from '../lib/config'
-import { myUpcomingBookings, type MyBooking } from '../auth/identity'
+import type { MyBooking } from '../auth/identity'
+import { useMyBookings } from '../hooks/useMyBookings'
 import { formatDayLong, formatTime } from '../lib/format'
 import { machineName } from '../lib/machines'
 import { useResidence } from '../residence/useResidence'
@@ -11,7 +12,7 @@ import { CancelBookingSheet } from './CancelBookingSheet'
 export function MyBookings() {
   const { t, i18n } = useTranslation()
   const { machines } = useResidence()
-  const [list, setList] = useState<MyBooking[]>(myUpcomingBookings)
+  const { list, refresh } = useMyBookings()
   const [toCancel, setToCancel] = useState<MyBooking | null>(null)
 
   return (
@@ -63,7 +64,7 @@ export function MyBookings() {
           booking={toCancel}
           machine={machines.find((m) => m.id === toCancel.machineId)}
           onClose={() => setToCancel(null)}
-          onCancelled={() => setList(myUpcomingBookings())}
+          onCancelled={refresh}
         />
       )}
     </section>

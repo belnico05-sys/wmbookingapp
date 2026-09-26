@@ -12,7 +12,12 @@
 // localStorage or cancel tokens directly.
 
 import { SLOT_MINUTES } from '../lib/config'
-import { cancelBooking, createBooking, type NewBooking } from '../api/bookings'
+import {
+  cancelBooking,
+  createBooking,
+  fetchExistingBookingIds,
+  type NewBooking,
+} from '../api/bookings'
 import { postNotice, registerPush, requestPushSend } from '../api/notices'
 import type { NoticeKind } from '../lib/notices'
 
@@ -101,6 +106,35 @@ export async function createMyBooking(input: NewBooking): Promise<void> {
       slotStart: input.slotStart.toISOString(),
     },
   ])
+}
+
+/**
+ * Brings the remembered bookings in line with the database: forgets the ones
+ * that no longer exist (deleted by the admin, or cancelled elsewhere) and the
+ * ones whose slot ended more than a day ago. If the database can't be
+ * reached, nothing is forgotten. Resolves true if something changed.
+ */
+export async function syncMyBookings(): Promise<boolean> {
+  const dayAgo = Date.now() - 24 * 60 * 60_000
+  const all = storedBookings()
+  const recent = all.filter((b) => new Date(b.slotStart).getTime() > dayAgo)
+  let existing: Set<string>
+  try {
+    existing = await fetchExistingBookingIds(recent.map((b) => b.id))
+  } catch {
+    return false
+  }
+  const checked = new Set(recent.map((b) => b.id))
+  // Re-read: a booking made while the request was running must not be lost.
+  const current = storedBookings()
+  const kept = current.filter((b) => {
+    if (new Date(b.slotStart).getTime() <= dayAgo) return false // long over
+    if (checked.has(b.id)) return existing.has(b.id) // still in the database?
+    return true // made while we were checking
+  })
+  if (kept.length === current.length) return false
+  writeStoredBookings(kept)
+  return true
 }
 
 /** Cancels one of the current user's bookings. Resolves false if it failed. */

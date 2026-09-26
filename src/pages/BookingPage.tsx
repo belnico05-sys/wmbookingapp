@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import type { Booking } from '../lib/types'
 import { firstSelectableDay, type Slot } from '../lib/slots'
-import { myBookingIds, myUpcomingBookings } from '../auth/identity'
+import { myBookingIds, myUpcomingBookings, syncMyBookings } from '../auth/identity'
 import { useDayBookings } from '../hooks/useDayBookings'
 import { useActiveNotices } from '../hooks/useActiveNotices'
 import { useResidence } from '../residence/useResidence'
@@ -34,6 +34,11 @@ export function BookingPage() {
   const [toNotice, setToNotice] = useState<Booking | null>(null)
   const { bookings, loadFailed, reload } = useDayBookings(selectedDay)
   const { notices, reload: reloadNotices } = useActiveNotices(settings.noticesEnabled)
+
+  // Forget remembered bookings that no longer exist (e.g. deleted by the admin).
+  useEffect(() => {
+    void syncMyBookings()
+  }, [])
 
   // Until the user picks one (or if theirs was retired), show the first
   // machine that is not under maintenance.

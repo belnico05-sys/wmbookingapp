@@ -114,10 +114,13 @@ export async function registerPush(
   return !error
 }
 
+let channelCount = 0
+
 /** Calls onChange whenever a notice is posted or deleted. Returns the unsubscribe function. */
 export function subscribeToNoticeChanges(onChange: () => void): () => void {
+  // A unique name per subscription: two screens may listen at the same time.
   const channel = db()
-    .channel('notices-changes')
+    .channel(`notices-changes-${++channelCount}`)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'notices' }, onChange)
     .subscribe()
   return () => {

@@ -77,6 +77,17 @@ export async function fetchUpcomingBookings(): Promise<Booking[]> {
   return (data as BookingRow[]).map(toBooking)
 }
 
+/**
+ * Which of the given booking ids still exist (e.g. not deleted by the admin).
+ * Throws on failure, so callers never mistake "offline" for "deleted".
+ */
+export async function fetchExistingBookingIds(ids: string[]): Promise<Set<string>> {
+  if (ids.length === 0) return new Set()
+  const { data, error } = await db().from('bookings').select('id').in('id', ids)
+  if (error) throw error
+  return new Set((data as { id: string }[]).map((row) => row.id))
+}
+
 export interface NewBooking {
   machineId: number
   slotStart: Date
@@ -121,13 +132,16 @@ export async function cancelBooking(id: string, cancelToken: string): Promise<bo
   return !error && data === true
 }
 
+let channelCount = 0
+
 /**
  * Calls onChange whenever any booking is created or deleted (Supabase
  * Realtime). Returns the function that stops listening.
  */
 export function subscribeToBookingChanges(onChange: () => void): () => void {
+  // A unique name per subscription: two screens may listen at the same time.
   const channel = db()
-    .channel('bookings-changes')
+    .channel(`bookings-changes-${++channelCount}`)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, onChange)
     .subscribe()
   return () => {

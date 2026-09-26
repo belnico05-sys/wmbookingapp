@@ -10,6 +10,7 @@ import {
   labelClass,
   primaryButtonClass,
 } from '../ui/styles'
+import { ChoiceGrid } from '../ui/ChoiceGrid'
 
 interface Props {
   /** All machines, retired ones included. */
@@ -147,29 +148,31 @@ function AddMachineForm({ onSave }: { onSave: RowProps['onSave'] }) {
       <h4 className="text-sm font-bold text-brand-900 dark:text-slate-100">
         {t('admin.machines.addTitle')}
       </h4>
-      <div className="grid grid-cols-2 gap-3">
-        <label className={labelClass}>
-          {t('admin.machines.type')}
-          <select
-            className={inputClass}
-            value={type}
-            onChange={(e) => setType(e.target.value as Machine['type'])}
-          >
-            <option value="washer">{t('machineTypes.washer')}</option>
-            <option value="dryer">{t('machineTypes.dryer')}</option>
-          </select>
-        </label>
-        <label className={labelClass}>
-          {t('admin.machines.location')}
-          <select
-            className={inputClass}
-            value={location}
-            onChange={(e) => setLocation(e.target.value as Machine['location'])}
-          >
-            <option value="internal">{t('locations.internal')}</option>
-            <option value="external">{t('locations.external')}</option>
-          </select>
-        </label>
+      <div className={labelClass}>
+        {t('admin.machines.type')}
+        <ChoiceGrid
+          value={type}
+          options={[
+            { value: 'washer', label: t('machineTypes.washer') },
+            { value: 'dryer', label: t('machineTypes.dryer') },
+          ]}
+          onChange={setType}
+          columns={2}
+          ariaLabel={t('admin.machines.type')}
+        />
+      </div>
+      <div className={labelClass}>
+        {t('admin.machines.location')}
+        <ChoiceGrid
+          value={location}
+          options={[
+            { value: 'internal', label: t('locations.internal') },
+            { value: 'external', label: t('locations.external') },
+          ]}
+          onChange={setLocation}
+          columns={2}
+          ariaLabel={t('admin.machines.location')}
+        />
       </div>
       <label className={labelClass}>
         {t('admin.machines.label')}

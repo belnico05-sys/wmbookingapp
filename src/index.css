@@ -36,6 +36,10 @@ body {
 }
 
 @media (prefers-color-scheme: dark) {
+  /* Native controls (number arrows, scrollbars, checkbox) follow dark mode too. */
+  :root {
+    color-scheme: dark;
+  }
   body {
     background: #2c2f3a;
     color: #e8eaf2;

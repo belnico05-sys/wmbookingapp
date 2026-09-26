@@ -8,6 +8,7 @@ import { createMyBooking, getProfile } from '../auth/identity'
 import { syncPush } from '../auth/push'
 import { useResidence } from '../residence/useResidence'
 import { Sheet } from './ui/Sheet'
+import { ChoiceGrid } from './ui/ChoiceGrid'
 import {
   errorBoxClass,
   inputClass,
@@ -108,23 +109,20 @@ export function BookingModal({ machine, slot, onClose, onBooked }: Props) {
           />
         </label>
 
-        <label className={labelClass}>
+        <div className={labelClass}>
           {t('booking.apartment')}
-          <select
-            className={inputClass}
-            value={apartment}
-            onChange={(e) => setApartment(e.target.value)}
-          >
-            <option value="" disabled>
-              {t('booking.apartmentPlaceholder')}
-            </option>
-            {Array.from({ length: apartmentCount }, (_, i) => String(i + 1)).map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
-        </label>
+          <ChoiceGrid
+            value={apartment || null}
+            options={Array.from({ length: apartmentCount }, (_, i) => ({
+              value: String(i + 1),
+              label: String(i + 1),
+            }))}
+            onChange={setApartment}
+            placeholder={t('booking.apartmentPlaceholder')}
+            columns={6}
+            ariaLabel={t('booking.apartment')}
+          />
+        </div>
 
         <label className={labelClass}>
           {t('booking.note')}

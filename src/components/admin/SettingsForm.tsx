@@ -4,6 +4,7 @@ import { updateSettings } from '../../api/admin'
 import { useResidence } from '../../residence/useResidence'
 import type { ResidenceSettings } from '../../lib/types'
 import { cardClass, errorBoxClass, inputClass, labelClass, primaryButtonClass } from '../ui/styles'
+import { ChoiceGrid } from '../ui/ChoiceGrid'
 
 interface Props {
   onSaved: () => void
@@ -34,6 +35,10 @@ export function SettingsForm({ onSaved }: Props) {
   const [lastSlotHour, setLastSlotHour] = useState(current.lastSlotHour)
   const [windowDays, setWindowDays] = useState(String(current.windowDays))
   const [busy, setBusy] = useState(false)
+  const hourChoices = HOURS.map((h) => ({
+    value: h,
+    label: t('slots.range', { start: hh(h), end: hh(h + 1) }),
+  }))
   const [result, setResult] = useState<'saved' | 'invalid' | 'failed' | null>(null)
 
   async function save(e: FormEvent) {
@@ -95,35 +100,25 @@ export function SettingsForm({ onSaved }: Props) {
         </span>
       </label>
 
-      <div className="grid grid-cols-2 gap-3">
-        <label className={labelClass}>
-          {t('admin.settings.firstSlot')}
-          <select
-            className={inputClass}
-            value={firstSlotHour}
-            onChange={(e) => setFirstSlotHour(Number(e.target.value))}
-          >
-            {HOURS.map((h) => (
-              <option key={h} value={h}>
-                {t('slots.range', { start: hh(h), end: hh(h + 1) })}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className={labelClass}>
-          {t('admin.settings.lastSlot')}
-          <select
-            className={inputClass}
-            value={lastSlotHour}
-            onChange={(e) => setLastSlotHour(Number(e.target.value))}
-          >
-            {HOURS.map((h) => (
-              <option key={h} value={h}>
-                {t('slots.range', { start: hh(h), end: hh(h + 1) })}
-              </option>
-            ))}
-          </select>
-        </label>
+      <div className={labelClass}>
+        {t('admin.settings.firstSlot')}
+        <ChoiceGrid
+          value={firstSlotHour}
+          options={hourChoices}
+          onChange={setFirstSlotHour}
+          columns={3}
+          ariaLabel={t('admin.settings.firstSlot')}
+        />
+      </div>
+      <div className={labelClass}>
+        {t('admin.settings.lastSlot')}
+        <ChoiceGrid
+          value={lastSlotHour}
+          options={hourChoices}
+          onChange={setLastSlotHour}
+          columns={3}
+          ariaLabel={t('admin.settings.lastSlot')}
+        />
       </div>
 
       <label className={labelClass}>

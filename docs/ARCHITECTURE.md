@@ -67,6 +67,34 @@ JavaScript). Everything below is enforced by Postgres, not by the frontend.
 The cancel token is stored only in the booking phone's `localStorage` (see
 `auth/identity.ts`). That's why cancelling works only from that device.
 
+## Notice board and notifications
+
+```
+PostNoticeSheet ─► identity.postMyNotice ─► RPC post_notice (token, time window, max 3)
+                                        └─► POST /api/notify {noticeId}
+api/notify.ts (Vercel, service role) ─► RPC claim_notice_push ─► web-push ─► browsers
+public/push-handler.js (service worker) ─► shows the notification
+```
+
+- **`notices`** are public while `settings.notices_enabled` is on (RLS policy). A
+  notice can be posted from 1 hour before the slot until it ends, max 3 per booking;
+  the free text is 1–100 characters. Rules duplicated in `src/lib/notices.ts`.
+- **`push_subscriptions`** link a browser's Web Push subscription to a booking made
+  on it (`register_push`, token-checked, max 5 per booking). No client can read
+  them. Only addresses of real push services (Google, Mozilla, Apple, Microsoft)
+  are accepted, so `api/notify.ts` can never be made to call an arbitrary server.
+- **`claim_notice_push`** is callable only with the service role key. It marks the
+  notice as sent (so each notice is pushed at most once, however many times
+  `/api/notify` is called) and returns the targets: same machine, bookings starting
+  in the 3 hours after the notice's slot, excluding the poster's own devices.
+- **Secrets:** the service role key and the VAPID private key live only in
+  Vercel's environment variables, read by `api/notify.ts`. Every file in `api/`
+  becomes a public endpoint, so don't put helpers there.
+- **iPhone:** Safari only allows web notifications for apps added to the Home
+  Screen (iOS 16.4+). `auth/push.ts` reports that as `needsInstall`.
+- **Local dev:** `npm run dev` has no service worker and doesn't run `api/`, so
+  notifications can only be tested on the deployed site.
+
 **Known weakness:** anyone with the link can create bookings under any name.
 [FUTURE-AUTH.md](FUTURE-AUTH.md) describes the fix (university login).
 
@@ -114,8 +142,8 @@ Never change the schema only in the dashboard.
   rewrite rules.
 - **Live updates:** `useDayBookings` refetches the visible day on every Realtime
   event on `bookings`, and ignores replies for a day the user has already left.
-- **Sheets:** every popup (booking form, cancel confirmation, date picker) uses
-  `components/ui/Sheet.tsx`. It's a bottom sheet on phones and a centred dialog on desktop.
+- **Sheets:** every popup (booking form, cancel confirmation, date picker, notice
+  form) uses `components/ui/Sheet.tsx`; "are you sure?" deletions use `ui/ConfirmSheet.tsx`. It's a bottom sheet on phones and a centred dialog on desktop.
 - **Styling:** Tailwind utility classes. Brand colours are tokens in
   `src/index.css` (`brand-*` indigo, `accent-*` red, from DSU Toscana). Dark
   mode follows the phone setting via `dark:` classes.

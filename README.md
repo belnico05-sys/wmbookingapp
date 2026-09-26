@@ -18,6 +18,11 @@ book a free 1-hour slot with their name and apartment number.
 - A booking can be cancelled (the "−" button, or the 📋 page) only from the
   device that made it.
 - The schedule updates live on every phone.
+- **Notice board ("Bacheca")**, switched on/off by the manager: on their own slot,
+  a student can post "finishing late", "finished early" or a short message (max
+  100 characters). People booked on the same machine in the next 3 hours get a
+  **push notification**, if they turned notifications on. On iPhone this only
+  works when the app is added to the Home Screen (iOS 16.4+).
 - Italian (primary) and English UI. Installable as a PWA.
 
 ## Tech stack
@@ -62,25 +67,32 @@ src/
     settings.ts   fetchSettings(): the residence's configuration
     machines.ts   fetchMachines()
     bookings.ts   fetchDayBookings(), createBooking(), cancelBooking(), live updates
+    notices.ts    Notice board: read, post, push subscription, live updates
     admin.ts      Manager sign-in + admin-only writes
   auth/
     identity.ts   Who the student is + which bookings are theirs (swap this for a real login)
+    push.ts       This device's notification permission + subscription
   residence/    Loads settings + machines once; useResidence() gives them to any component
-  hooks/        React hooks that load data: useDayBookings, useAdminSession
+  hooks/        React hooks that load data: useDayBookings, useActiveNotices, useAdminSession
   pages/        One component per screen: BookingPage (/), MyBookingsPage (/prenotazioni),
                 AdminPage (/admin)
   components/   UI pieces (SlotList, BookingModal, CancelBookingSheet, DatePicker, …)
     admin/        The admin panel sections
-    ui/           Sheet (shared bottom-sheet / dialog shell), styles.ts (shared classes)
+    ui/           Sheet (bottom-sheet / dialog shell), ConfirmSheet, styles.ts (shared classes)
   lib/          Pure helpers, no React, no network
     config.ts     Slot length + the BookingRules type
     slots.ts      Slot and day maths (takes the residence's rules as a parameter)
     machines.ts   machineName(): "Lavatrice 1 (interna)" from type + label + location
+    notices.ts    Notice board rules (when you can post, 100-char limit, how long it shows)
     calendar.ts   Month grid for the date picker
     format.ts     Date/time formatting
     ics.ts        Calendar reminder (.ics file + Google Calendar link)
     types.ts      Domain types: Machine, Booking
   locales/      it.json (primary) and en.json — must have the same keys
+api/
+  notify.ts     Vercel serverless function that sends the push notifications
+public/
+  push-handler.js  Service-worker code that shows notifications
 supabase/
   migrations/   The database schema, as SQL files (source of truth)
 docs/
@@ -121,11 +133,26 @@ Each residence gets its own copy, with no code changes:
    every file in `supabase/migrations/` **in filename order**.
 2. **Manager account:** follow the three steps above.
 3. **Vercel:** import this GitHub repo as a new project and set the environment
-   variables `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` from the new
-   Supabase project (Project Settings → API).
+   variables (Settings → Environment Variables), see the table below.
 4. Open `/#/admin` on the new site and set the name, apartments and hours.
    The machines start as the 5 from the original residence: rename, retire or
    add machines to match.
+
+### Environment variables (Vercel)
+
+| Name                        | Where to get it                                              | Secret? |
+| --------------------------- | ------------------------------------------------------------ | ------- |
+| `VITE_SUPABASE_URL`         | Supabase → Project Settings → API → Project URL              | no      |
+| `VITE_SUPABASE_ANON_KEY`    | Supabase → Project Settings → API → `anon` public key        | no      |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Project Settings → API → `service_role` key       | **yes** |
+| `VITE_VAPID_PUBLIC_KEY`     | `npx web-push generate-vapid-keys` → Public Key              | no      |
+| `VAPID_PRIVATE_KEY`         | same command → Private Key                                   | **yes** |
+| `VAPID_SUBJECT`             | the site's URL, e.g. `https://your-site.vercel.app`          | no      |
+
+The last four are only needed for notice-board notifications. Without them the
+board still works, just without notifications. Generate a **new** VAPID key pair for
+each residence and never commit the secret ones. After changing env vars, redeploy
+(Vercel → Deployments → ⋯ → Redeploy).
 
 ## Common changes
 
@@ -153,4 +180,7 @@ deploys nothing.
 ## Before launch
 
 - The **privacy policy text** is still a placeholder (see `booking.consent` in the
-  locale files). It must be written before the app is officially launched.
+  locale files). It must be written before the app is officially launched. It must
+  also mention the notice board: posted notices are public, and turning on
+  notifications stores the browser's push subscription (linked to that device's
+  bookings, deleted about a day after the slot).

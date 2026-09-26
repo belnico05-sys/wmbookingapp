@@ -38,7 +38,10 @@ students on their phones; the app is shared via link/QR code.
 - A **consent checkbox is mandatory before saving any booking**: the user
   confirms the data is correct and accepts the privacy policy.
 - The privacy policy text is **TBD — flag it before launch**.
-- Never store or log personal data beyond name + apartment number.
+- Never store or log personal data beyond name + apartment number. Exception,
+  opt-in only: the browser push subscription of users who turn on notice-board
+  notifications (table `push_subscriptions`, readable by no client, cleaned up
+  about a day after the slot). The privacy policy must mention it.
 
 ## i18n rule
 

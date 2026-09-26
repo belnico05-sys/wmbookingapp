@@ -66,8 +66,16 @@ in `admins`. The manager could then also sign in through the university; you'd
 simply add their user id to `admins`. Even when students can sign in, keep public
 email/password sign-ups off: only the university provider should create accounts.
 
+## Notice board
+
+`postMyNotice` and `registerPushForMyBookings` in `auth/identity.ts` use the
+cancel token today. With login, `post_notice` and `register_push` should check
+`auth.uid()` against `bookings.user_id` instead, and a push subscription can be
+linked to the user rather than to each booking (then notifications work on every
+device the student signed in on).
+
 ## Privacy
 
 The privacy policy must say what the login provides (email, name) and that
-only name + apartment are stored with bookings. Update it before switching on
-login.
+only name + apartment are stored with bookings, plus the push subscriptions of
+users who turn on notifications. Update it before switching on login.

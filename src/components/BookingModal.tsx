@@ -5,6 +5,7 @@ import { machineName } from '../lib/machines'
 import type { Slot } from '../lib/slots'
 import { BookingError } from '../api/bookings'
 import { createMyBooking, getProfile } from '../auth/identity'
+import { syncPush } from '../auth/push'
 import { useResidence } from '../residence/useResidence'
 import { Sheet } from './ui/Sheet'
 import {
@@ -31,7 +32,7 @@ function isValidApartment(value: string | undefined, count: number): boolean {
 
 /** Booking form (name, apartment, note, mandatory consent), then the success step. */
 export function BookingModal({ machine, slot, onClose, onBooked }: Props) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { apartmentCount, firstSlotHour, lastSlotHour, windowDays } = useResidence().settings
   const profile = getProfile()
   const [name, setName] = useState(profile?.name ?? '')
@@ -74,6 +75,8 @@ export function BookingModal({ machine, slot, onClose, onBooked }: Props) {
       setSubmitting(false)
       return
     }
+    // Notifications already on for this device? Link them to this booking too.
+    void syncPush(i18n.language)
     onBooked()
     setSucceeded(true)
   }

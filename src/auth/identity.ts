@@ -13,6 +13,8 @@
 
 import { SLOT_MINUTES } from '../lib/config'
 import { cancelBooking, createBooking, type NewBooking } from '../api/bookings'
+import { postNotice, registerPush, requestPushSend } from '../api/notices'
+import type { NoticeKind } from '../lib/notices'
 
 export interface Profile {
   name: string
@@ -108,4 +110,37 @@ export async function cancelMyBooking(id: string): Promise<boolean> {
   const ok = await cancelBooking(id, stored.cancelToken)
   if (ok) writeStoredBookings(storedBookings().filter((b) => b.id !== id))
   return ok
+}
+
+// --- Notice board + notifications
+
+/**
+ * Posts a notice on one of the current user's bookings and asks the server
+ * to notify the people booked after it. Throws a NoticeError if refused.
+ */
+export async function postMyNotice(
+  bookingId: string,
+  kind: NoticeKind,
+  message: string | null,
+): Promise<void> {
+  const stored = storedBookings().find((b) => b.id === bookingId)
+  if (!stored) throw new Error('not my booking')
+  const noticeId = await postNotice(bookingId, stored.cancelToken, kind, message)
+  requestPushSend(noticeId)
+}
+
+/**
+ * Links this device's notification subscription to all the current user's
+ * upcoming bookings, so they are notified about notices on earlier slots.
+ */
+export async function registerPushForMyBookings(
+  subscription: PushSubscriptionJSON,
+  lang: string,
+): Promise<void> {
+  const upcoming = new Set(myUpcomingBookings().map((b) => b.id))
+  await Promise.all(
+    storedBookings()
+      .filter((b) => upcoming.has(b.id))
+      .map((b) => registerPush(b.id, b.cancelToken, subscription, lang)),
+  )
 }

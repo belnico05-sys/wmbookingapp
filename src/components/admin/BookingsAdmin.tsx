@@ -6,14 +6,9 @@ import { formatDayLong, formatTime } from '../../lib/format'
 import { machineName } from '../../lib/machines'
 import { fetchUpcomingBookings } from '../../api/bookings'
 import { deleteBooking } from '../../api/admin'
-import { Sheet } from '../ui/Sheet'
+import { ConfirmSheet } from '../ui/ConfirmSheet'
 import { SlotPill } from '../SlotPill'
-import {
-  cardClass,
-  dangerButtonClass,
-  errorBoxClass,
-  secondaryButtonClass,
-} from '../ui/styles'
+import { cardClass, errorBoxClass } from '../ui/styles'
 
 interface Props {
   /** All machines, retired ones included (to name every booking). */
@@ -130,44 +125,25 @@ interface SheetProps {
 
 function DeleteBookingSheet({ booking, machine, onClose, onDeleted }: SheetProps) {
   const { t } = useTranslation()
-  const [busy, setBusy] = useState(false)
-  const [failed, setFailed] = useState(false)
-
-  async function confirm() {
-    setBusy(true)
-    setFailed(false)
-    try {
-      await deleteBooking(booking.id)
-      onDeleted()
-      onClose()
-    } catch {
-      setFailed(true)
-      setBusy(false)
-    }
-  }
-
   return (
-    <Sheet onClose={onClose}>
-      <h2 className="text-lg font-bold text-brand-900 dark:text-slate-100">
-        {t('admin.bookings.confirmTitle')}
-      </h2>
+    <ConfirmSheet
+      title={t('admin.bookings.confirmTitle')}
+      confirmLabel={t('admin.bookings.confirm')}
+      busyLabel={t('admin.bookings.deleting')}
+      keepLabel={t('admin.bookings.keep')}
+      errorText={t('admin.saveFailed')}
+      onConfirm={async () => {
+        await deleteBooking(booking.id)
+        onDeleted()
+      }}
+      onClose={onClose}
+    >
       <p className="mt-1 text-sm font-semibold text-brand-700 dark:text-slate-300">{machine}</p>
       <SlotPill start={booking.slotStart} />
       <p className="mt-3 text-sm text-brand-700 dark:text-slate-300">
         {t('slots.bookedBy', { name: booking.name, apartment: booking.apartment })}
       </p>
       <p className="mt-1 text-xs text-brand-400 dark:text-slate-400">{t('admin.bookings.confirmHint')}</p>
-
-      {failed && <p className={`mt-4 ${errorBoxClass}`}>{t('admin.saveFailed')}</p>}
-
-      <div className="mt-5 flex gap-2.5">
-        <button className={`flex-1 ${secondaryButtonClass}`} onClick={onClose}>
-          {t('admin.bookings.keep')}
-        </button>
-        <button className={`flex-1 ${dangerButtonClass}`} disabled={busy} onClick={confirm}>
-          {busy ? t('admin.bookings.deleting') : t('admin.bookings.confirm')}
-        </button>
-      </div>
-    </Sheet>
+    </ConfirmSheet>
   )
 }

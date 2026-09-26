@@ -3,8 +3,9 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import type { Booking } from '../lib/types'
 import { firstSelectableDay, type Slot } from '../lib/slots'
-import { myBookingIds } from '../auth/identity'
+import { myBookingIds, myUpcomingBookings } from '../auth/identity'
 import { useDayBookings } from '../hooks/useDayBookings'
+import { useActiveNotices } from '../hooks/useActiveNotices'
 import { useResidence } from '../residence/useResidence'
 import { BrandHeader } from '../components/BrandHeader'
 import { DatePicker } from '../components/DatePicker'
@@ -13,17 +14,26 @@ import { SlotList } from '../components/SlotList'
 import { BookingModal } from '../components/BookingModal'
 import { CancelBookingSheet } from '../components/CancelBookingSheet'
 import { LanguageToggle } from '../components/LanguageToggle'
+import { NoticeBoard } from '../components/NoticeBoard'
+import { PostNoticeSheet } from '../components/PostNoticeSheet'
+import { NotificationsCard } from '../components/NotificationsCard'
 
-/** Home page: pick a day and a machine, then book a free slot or unbook your own. */
+/**
+ * Home page: pick a day and a machine, then book a free slot or unbook your
+ * own. With the notice board on, it also shows the board and lets you post a
+ * notice on your own current slot.
+ */
 export function BookingPage() {
   const { t } = useTranslation()
-  const { machines } = useResidence()
+  const { machines, settings } = useResidence()
 
   const [selectedDay, setSelectedDay] = useState<Date>(firstSelectableDay)
   const [selectedMachineId, setSelectedMachineId] = useState<number | null>(null)
   const [toBook, setToBook] = useState<Slot | null>(null)
   const [toCancel, setToCancel] = useState<Booking | null>(null)
+  const [toNotice, setToNotice] = useState<Booking | null>(null)
   const { bookings, loadFailed, reload } = useDayBookings(selectedDay)
+  const { notices, reload: reloadNotices } = useActiveNotices(settings.noticesEnabled)
 
   // Until the user picks one (or if theirs was retired), show the first
   // machine that is not under maintenance.
@@ -57,6 +67,14 @@ export function BookingPage() {
           </p>
         )}
 
+        {settings.noticesEnabled && myUpcomingBookings().length > 0 && (
+          <div className="mt-5">
+            <NotificationsCard mode="prompt" />
+          </div>
+        )}
+
+        <NoticeBoard notices={notices} />
+
         <section className="mt-5">
           <DatePicker selected={selectedDay} onSelect={setSelectedDay} />
         </section>
@@ -78,6 +96,8 @@ export function BookingPage() {
               myBookingIds={myBookingIds()}
               onPick={setToBook}
               onCancel={setToCancel}
+              notices={notices}
+              onNotice={settings.noticesEnabled ? setToNotice : null}
             />
           )}
         </section>
@@ -89,6 +109,15 @@ export function BookingPage() {
           machine={machines.find((m) => m.id === toCancel.machineId)}
           onClose={() => setToCancel(null)}
           onCancelled={reload}
+        />
+      )}
+
+      {toNotice && (
+        <PostNoticeSheet
+          booking={toNotice}
+          machine={machines.find((m) => m.id === toNotice.machineId)}
+          onClose={() => setToNotice(null)}
+          onPosted={reloadNotices}
         />
       )}
 

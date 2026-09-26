@@ -3,6 +3,7 @@
 // with column names.
 
 import type { BookingRules } from './config'
+import type { NoticeKind } from './notices'
 
 export interface Machine {
   id: number
@@ -34,4 +35,20 @@ export interface ResidenceSettings extends BookingRules {
   residenceName: string
   /** Valid apartments are 1 … apartmentCount. */
   apartmentCount: number
+  /** Notice board ("Bacheca") switched on by the admin. */
+  noticesEnabled: boolean
+}
+
+/** A notice on the board, with the booking it belongs to. */
+export interface Notice {
+  id: string
+  kind: NoticeKind
+  /** Only for kind 'custom'. */
+  message: string | null
+  createdAt: Date
+  bookingId: string
+  machineId: number
+  slotStart: Date
+  /** Name of the person who booked (the poster). */
+  name: string
 }

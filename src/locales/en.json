@@ -92,6 +92,54 @@
     "previousMonth": "Previous month",
     "nextMonth": "Next month"
   },
+  "notices": {
+    "boardTitle": "Notice board",
+    "by": "— {{name}}",
+    "kinds": {
+      "late": "I'm finishing late",
+      "early": "I finished early"
+    },
+    "tags": {
+      "late": "Running late",
+      "early": "Finished early",
+      "custom": "Notice"
+    },
+    "post": {
+      "button": "Post a notice",
+      "title": "Let the next people know",
+      "options": {
+        "late": "I'm finishing late",
+        "early": "I finished early",
+        "custom": "Write a message"
+      },
+      "placeholder": "E.g. I left the clothes in the basket",
+      "counter": "{{count}}/{{max}}",
+      "hint": "The notice appears on the board. People who booked this machine in the next 3 hours get a notification, if they turned it on.",
+      "send": "Post",
+      "sending": "Posting…"
+    },
+    "errors": {
+      "notices_disabled": "The notice board has been turned off by the manager.",
+      "not_your_booking": "You can only post notices on your own bookings, from the device you booked on.",
+      "notice_too_early": "You can post a notice starting one hour before your slot.",
+      "notice_too_late": "Your slot has already ended.",
+      "notice_limit": "You have already posted 3 notices for this slot.",
+      "notice_invalid": "The message must be 1 to 100 characters long.",
+      "generic": "Could not post. Please try again."
+    },
+    "push": {
+      "title": "Notifications on your phone",
+      "body": "Get notified if the person using the machine before you finishes late or early.",
+      "enable": "Turn on notifications",
+      "enabling": "Turning on…",
+      "dismiss": "No thanks",
+      "enabled": "Notifications are on for this device.",
+      "blocked": "Notifications are blocked: you can allow them again in your browser's settings for this site.",
+      "needsInstall": "On iPhone, notifications only work if you add the app to your Home Screen: tap Share → \"Add to Home Screen\", then open the app from there.",
+      "unsupported": "This browser doesn't support notifications.",
+      "failed": "Could not turn on notifications. Please try again."
+    }
+  },
   "admin": {
     "title": "Residence management",
     "signOut": "Sign out",
@@ -148,6 +196,19 @@
       "confirmHint": "The person will not be notified.",
       "keep": "No, keep it",
       "confirm": "Yes, delete",
+      "deleting": "Deleting…"
+    },
+    "notices": {
+      "title": "Notice board",
+      "stateOn": "On: students can post notices on their own slots and get notifications.",
+      "stateOff": "Off: the board is hidden and nobody can post notices.",
+      "enable": "Turn the board on",
+      "disable": "Turn the board off",
+      "empty": "No active notices.",
+      "delete": "Delete",
+      "confirmTitle": "Delete this notice?",
+      "confirm": "Yes, delete",
+      "keep": "No, keep it",
       "deleting": "Deleting…"
     }
   }

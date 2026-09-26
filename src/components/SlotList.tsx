@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
-import type { Booking, Machine } from '../lib/types'
+import type { Booking, Machine, Notice } from '../lib/types'
+import { canPostNotice, NOTICE_ICON } from '../lib/notices'
 import { slotsForDay, isSlotOver, type Slot } from '../lib/slots'
 import { formatTime } from '../lib/format'
 import { useResidence } from '../residence/useResidence'
@@ -13,10 +14,23 @@ interface Props {
   onPick: (slot: Slot) => void
   /** The "−" on one of the user's own bookings was tapped. */
   onCancel: (booking: Booking) => void
+  /** Active notice-board notices (empty when the feature is off). */
+  notices: Notice[]
+  /** The 📢 on one of the user's own bookings was tapped (null = feature off). */
+  onNotice: ((booking: Booking) => void) | null
 }
 
 /** The day's slots for one machine: free ("+"), taken, or the user's own ("−"). */
-export function SlotList({ machine, day, bookings, myBookingIds, onPick, onCancel }: Props) {
+export function SlotList({
+  machine,
+  day,
+  bookings,
+  myBookingIds,
+  onPick,
+  onCancel,
+  notices,
+  onNotice,
+}: Props) {
   const { t, i18n } = useTranslation()
   const lang = i18n.language
   const rules = useResidence().settings
@@ -28,6 +42,12 @@ export function SlotList({ machine, day, bookings, myBookingIds, onPick, onCance
     if (b.machineId === machine.id) {
       byStart.set(b.slotStart.getTime(), b)
     }
+  }
+
+  // Latest notice per booking (notices arrive newest first).
+  const noticeOf = new Map<string, Notice>()
+  for (const n of notices) {
+    if (!noticeOf.has(n.bookingId)) noticeOf.set(n.bookingId, n)
   }
 
   return (
@@ -49,6 +69,7 @@ export function SlotList({ machine, day, bookings, myBookingIds, onPick, onCance
         })
 
         if (booking) {
+          const notice = noticeOf.get(booking.id)
           return (
             <li
               key={slot.start.toISOString()}
@@ -67,6 +88,16 @@ export function SlotList({ machine, day, bookings, myBookingIds, onPick, onCance
                     <span className="rounded-full bg-brand-600 px-2.5 py-0.5 text-xs font-semibold text-white">
                       {t('slots.yours')}
                     </span>
+                    {onNotice && canPostNotice(slot.start) && (
+                      <button
+                        onClick={() => onNotice(booking)}
+                        aria-label={t('notices.post.button')}
+                        title={t('notices.post.button')}
+                        className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-400 text-xs leading-none transition hover:bg-amber-500"
+                      >
+                        📢
+                      </button>
+                    )}
                     {!over && (
                       <button
                         onClick={() => onCancel(booking)}
@@ -87,6 +118,11 @@ export function SlotList({ machine, day, bookings, myBookingIds, onPick, onCance
                   </span>
                 )}
               </div>
+              {notice && (
+                <p className="mt-1.5 inline-block rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-900 dark:bg-amber-500/20 dark:text-amber-100">
+                  {NOTICE_ICON[notice.kind]} {t(`notices.tags.${notice.kind}`)}
+                </p>
+              )}
               {booking.note && (
                 <p className="mt-1.5 rounded-lg bg-brand-100/60 px-2 py-1 text-xs text-brand-700 dark:bg-white/10 dark:text-slate-200">
                   {t('slots.note', { note: booking.note })}

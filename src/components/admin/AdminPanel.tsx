@@ -6,9 +6,10 @@ import { useResidence } from '../../residence/useResidence'
 import { SettingsForm } from './SettingsForm'
 import { MachinesAdmin } from './MachinesAdmin'
 import { BookingsAdmin } from './BookingsAdmin'
+import { NoticesAdmin } from './NoticesAdmin'
 
 /**
- * The three admin sections. Holds the full machine list (retired ones
+ * The admin sections. Holds the full machine list (retired ones
  * included), which both the machines and the bookings sections need.
  */
 export function AdminPanel() {
@@ -40,6 +41,7 @@ export function AdminPanel() {
     <div className="mt-4 flex flex-col gap-6">
       <SettingsForm onSaved={onChanged} />
       <MachinesAdmin machines={machines} onChanged={onChanged} />
+      <NoticesAdmin machines={machines} onChanged={onChanged} />
       <BookingsAdmin machines={machines} />
     </div>
   )

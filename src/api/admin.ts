@@ -50,6 +50,7 @@ export function updateSettings(s: ResidenceSettings): Promise<void> {
     p_first_slot_hour: s.firstSlotHour,
     p_last_slot_hour: s.lastSlotHour,
     p_window_days: s.windowDays,
+    p_notices_enabled: s.noticesEnabled,
   })
 }
 
@@ -72,4 +73,8 @@ export function updateMachine(m: Pick<Machine, 'id' | 'label' | 'active' | 'reti
 
 export function deleteBooking(id: string): Promise<void> {
   return adminRpc('admin_delete_booking', { p_booking_id: id })
+}
+
+export function deleteNotice(id: string): Promise<void> {
+  return adminRpc('admin_delete_notice', { p_notice_id: id })
 }

@@ -4,6 +4,8 @@ import { machineName } from '../lib/machines'
 import type { Slot } from '../lib/slots'
 import { downloadIcs, googleCalendarUrl } from '../lib/ics'
 import { SlotPill } from './SlotPill'
+import { NotificationsCard } from './NotificationsCard'
+import { useResidence } from '../residence/useResidence'
 
 interface Props {
   machine: Machine
@@ -14,6 +16,7 @@ interface Props {
 /** Second step of the booking sheet: confirmation + calendar reminder. */
 export function BookingSuccess({ machine, slot, onClose }: Props) {
   const { t } = useTranslation()
+  const { noticesEnabled } = useResidence().settings
 
   const reminderEvent = {
     title: t('reminder.summary', { machine: machineName(t, machine) }),
@@ -35,6 +38,7 @@ export function BookingSuccess({ machine, slot, onClose }: Props) {
         {t('booking.reminderQuestion')}
       </p>
       <div className="mt-3 flex w-full flex-col gap-2.5">
+        {noticesEnabled && <NotificationsCard mode="prompt" />}
         <button
           className="rounded-xl bg-brand-600 py-3 text-sm font-semibold text-white shadow-md shadow-brand-600/30 transition hover:bg-brand-700"
           onClick={() => downloadIcs(reminderEvent)}

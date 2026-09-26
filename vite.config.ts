@@ -10,6 +10,10 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      // Adds the notice-board notification handlers to the generated service worker.
+      workbox: {
+        importScripts: ['push-handler.js'],
+      },
       manifest: {
         name: 'Lavatrici — Prenotazioni',
         short_name: 'Lavatrici',

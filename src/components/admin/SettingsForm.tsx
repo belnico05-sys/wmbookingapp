@@ -44,6 +44,8 @@ export function SettingsForm({ onSaved }: Props) {
       firstSlotHour,
       lastSlotHour,
       windowDays: Number(windowDays),
+      // Switched from the notice-board section, not from this form.
+      noticesEnabled: current.noticesEnabled,
     }
     if (!isValid(next)) {
       setResult('invalid')

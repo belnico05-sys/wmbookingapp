@@ -92,6 +92,54 @@
     "previousMonth": "Mese precedente",
     "nextMonth": "Mese successivo"
   },
+  "notices": {
+    "boardTitle": "Bacheca",
+    "by": "— {{name}}",
+    "kinds": {
+      "late": "Finisco in ritardo",
+      "early": "Ho finito prima"
+    },
+    "tags": {
+      "late": "In ritardo",
+      "early": "Finito prima",
+      "custom": "Avviso"
+    },
+    "post": {
+      "button": "Pubblica un avviso",
+      "title": "Avvisa chi viene dopo di te",
+      "options": {
+        "late": "Finisco in ritardo",
+        "early": "Ho finito prima",
+        "custom": "Scrivi un messaggio"
+      },
+      "placeholder": "Es. ho lasciato i panni nel cesto",
+      "counter": "{{count}}/{{max}}",
+      "hint": "L'avviso compare nella bacheca. Chi ha prenotato questa macchina nelle 3 ore successive riceve una notifica, se l'ha attivata.",
+      "send": "Pubblica",
+      "sending": "Pubblicazione…"
+    },
+    "errors": {
+      "notices_disabled": "La bacheca è stata disattivata dal gestore.",
+      "not_your_booking": "Puoi pubblicare avvisi solo sulle tue prenotazioni, dal dispositivo da cui le hai fatte.",
+      "notice_too_early": "Puoi pubblicare un avviso da un'ora prima del tuo turno.",
+      "notice_too_late": "Il tuo turno è già finito.",
+      "notice_limit": "Hai già pubblicato 3 avvisi per questo turno.",
+      "notice_invalid": "Il messaggio deve avere da 1 a 100 caratteri.",
+      "generic": "Pubblicazione non riuscita. Riprova."
+    },
+    "push": {
+      "title": "Avvisi sul telefono",
+      "body": "Ricevi una notifica se chi usa la macchina prima di te finisce in ritardo o in anticipo.",
+      "enable": "Attiva notifiche",
+      "enabling": "Attivazione…",
+      "dismiss": "No grazie",
+      "enabled": "Notifiche attive su questo dispositivo.",
+      "blocked": "Notifiche bloccate: puoi riattivarle dalle impostazioni del browser per questo sito.",
+      "needsInstall": "Su iPhone le notifiche funzionano solo se aggiungi l'app alla schermata Home: tocca Condividi → «Aggiungi alla schermata Home», poi apri l'app da lì.",
+      "unsupported": "Questo browser non supporta le notifiche.",
+      "failed": "Attivazione non riuscita. Riprova."
+    }
+  },
   "admin": {
     "title": "Gestione residenza",
     "signOut": "Esci",
@@ -148,6 +196,19 @@
       "confirmHint": "La persona non riceverà nessun avviso.",
       "keep": "No, tienila",
       "confirm": "Sì, elimina",
+      "deleting": "Eliminazione…"
+    },
+    "notices": {
+      "title": "Bacheca avvisi",
+      "stateOn": "Attiva: gli studenti possono pubblicare avvisi sui propri turni e ricevere notifiche.",
+      "stateOff": "Disattivata: la bacheca non si vede e non si possono pubblicare avvisi.",
+      "enable": "Attiva la bacheca",
+      "disable": "Disattiva la bacheca",
+      "empty": "Nessun avviso attivo.",
+      "delete": "Elimina",
+      "confirmTitle": "Eliminare questo avviso?",
+      "confirm": "Sì, elimina",
+      "keep": "No, tienilo",
       "deleting": "Eliminazione…"
     }
   }
